@@ -1,0 +1,43 @@
+[tool.poetry]
+name = "italiclas"
+version = "0.0.0"
+description = "*Itali*an *Clas*sifier: A simple classifier for the Italian language."
+authors = ["Riccardo Metere <riccardo@metere.it>"]
+license = "GPLv3"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+numpy = "^2.0.2"
+numba = "^0.60.0"
+scipy = "^1.14.1"
+pandas = "^2.2.3"
+scikit-learn = "^1.5.2"
+matplotlib = "^3.9.2"
+pydantic = "^2.9.2"
+pydantic-settings = "^2.6.1"
+rich = "^13.9.4"
+fastapi = "^0.115.4"
+uvicorn = "^0.32.0"
+requests = "^2.32.3"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3.3"
+coverage = "^7.6.4"
+ruff = "^0.7.2"
+mypy = "^1.13.0"
+mypy-extensions = "^1.0.0"
+pyright = "^1.1.388"
+jupyter = "^1.1.1"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.ruff]
+line-length = 79
+target-version = 'py312'
+exclude = ["*.ipynb"]
+
+[tool.ruff.lint]
+select = ["ALL"]

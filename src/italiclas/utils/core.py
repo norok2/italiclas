@@ -104,10 +104,10 @@ def simpler_text(
              - The literal matching of "]" must be "\\["
              - The literal matching of "-" must be "\\-" or placed at the end.
             Defaults to "a-zA-Z0-9._-"
-        replacing (str): The text used to replace non-allowed characters.
+        replacing (str): The replacement text.
         quench (bool): Group consecutive non-allowed characters.
             If True, consecutive non-allowed characters are replaced by a
-            single instance of `replacing`.
+            single replacement.
             Otherwise, each character is replaced individually.
 
     Returns:
@@ -120,11 +120,7 @@ def simpler_text(
         _-_data_science_is_funny_
 
     """  # noqa: D301
-    return re.sub(
-        rf"[^{allowed}]{'+' if quench else ''}",
-        replacing,
-        text,
-    )
+    return re.sub(rf"[^{allowed}]{'+' if quench else ''}", replacing, text)
 
 
 # =====================================================================
@@ -242,19 +238,19 @@ def number2str(
         The number with the specified number of significant figures as string.
 
     Examples:
-        >>> values = [123 * 10 ** k for k in range(0, 7)]
+        >>> values = [123 * 10 ** k for k in range(0, 6)]
         >>> for p in range(1, 5):
         ...     print([number2str(value, p) for value in values])
-        ['100', '1_000', '10_000', '1e+05', '1e+06', '1e+07', '1e+08']
-        ['120', '1_200', '12_000', '120_000', '1.2e+06', '1.2e+07', '1.2e+08']
-        ['123', '1_230', '12_300', '123_000', '1_230_000', '1.23e+07', '1.23e+08']
-        ['123', '1_230', '12_300', '123_000', '1_230_000', '12_300_000', '1.23e+08']
+        ['100', '1_000', '10_000', '1e+05', '1e+06', '1e+07']
+        ['120', '1_200', '12_000', '120_000', '1.2e+06', '1.2e+07']
+        ['123', '1_230', '12_300', '123_000', '1_230_000', '1.23e+07']
+        ['123', '1_230', '12_300', '123_000', '1_230_000', '12_300_000']
         >>> for p in range(1, 5):
         ...     print([number2str(value, p, 0) for value in values])
-        ['1e+02', '1e+03', '1e+04', '1e+05', '1e+06', '1e+07', '1e+08']
-        ['1.2e+02', '1.2e+03', '1.2e+04', '1.2e+05', '1.2e+06', '1.2e+07', '1.2e+08']
-        ['123', '1.23e+03', '1.23e+04', '1.23e+05', '1.23e+06', '1.23e+07', '1.23e+08']
-        ['123', '1_230', '1.23e+04', '1.23e+05', '1.23e+06', '1.23e+07', '1.23e+08']
+        ['1e+02', '1e+03', '1e+04', '1e+05', '1e+06', '1e+07']
+        ['1.2e+02', '1.2e+03', '1.2e+04', '1.2e+05', '1.2e+06', '1.2e+07']
+        ['123', '1.23e+03', '1.23e+04', '1.23e+05', '1.23e+06', '1.23e+07']
+        ['123', '1_230', '1.23e+04', '1.23e+05', '1.23e+06', '1.23e+07']
 
         >>> values = [123 * 10 ** k for k in range(-7, 0)]
         >>> for p in range(1, 5):
@@ -278,6 +274,36 @@ def number2str(
     if thousand_sep:
         result = result.replace(",", thousand_sep)
     return result
+
+
+# =====================================================================
+def no_blanks(text: str, replacing: str = "", *, quench: bool = True) -> str:
+    """Replace blanks.
+
+    Args:
+        text: The input text.
+        replacing: The replacement text.
+            Defaults to "".
+        quench (bool): Group consecutive blank characters.
+            If True, consecutive blanks are replaced by a single replacement.
+            Otherwise, each character is replaced individually.
+
+    Returns:
+        The processed text.
+
+    Examples:
+        >>> no_blanks("  ciao  mondo ")
+        'ciaomondo'
+        >>> no_blanks("  ciao  mondo ", "_")
+        '_ciao_mondo_'
+        >>> no_blanks("  ciao  mondo ", "_", quench=False)
+        '__ciao__mondo_'
+
+        >>> no_blanks("  ciao  mondo ".strip(), "_")
+        'ciao_mondo'
+
+    """
+    return re.sub(rf"\s{'+' if quench else ''}", replacing, text)
 
 
 # =====================================================================
@@ -320,6 +346,7 @@ def is_running_in_docker(
 
     Examples:
         >>> is_running_in_docker()
+        False
 
     """
     # : use os.path for speed

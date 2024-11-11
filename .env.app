@@ -15,4 +15,4 @@ RAW_DATA_SOURCE_FILENAME="Language Detection.csv"
 
 RAW_FILENAME="raw_data.csv"
 CLEAN_FILENAME="clean_data.csv"
-PIPELINE_FILENAME="pipeline.pkl"
+ML_PIPELINE_FILENAME="ml_pipeline.pkl.lzma"

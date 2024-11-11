@@ -52,7 +52,7 @@ def preprocess_raw_data(
         df = pd.read_csv(raw_filepath)  # noqa: PD901
         df = df.rename(columns=lambda x: core.namify(x.lower()))  # noqa: PD901
         df["is_italian"] = df["language"] == "Italian"
-        df.drop(["language"], axis=1, inplace=True)
+        df = df.drop(["language"], axis=1)  # noqa: PD901
         logger.info(df.columns)
         df.to_csv(clean_filepath, index=False)
         logger.info("[ETL] Clean data stored to '%s'", clean_filepath)

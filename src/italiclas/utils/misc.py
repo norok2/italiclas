@@ -2,6 +2,7 @@
 
 import argparse
 import logging
+from collections.abc import Iterable
 
 from italiclas.config import info
 from italiclas.logger import console_handler, logger
@@ -11,22 +12,21 @@ from italiclas.logger import console_handler, logger
 def common_args(
     arg_parser: argparse.ArgumentParser | None = None,
     description: str = "",
+    arguments: Iterable[str] = frozenset(
+        ["help", "version", "verbose", "quiet", "log", "force"],
+    ),
 ) -> argparse.ArgumentParser:
     """Handle command-line application arguments.
-
-    The following arguments are included:
-        - h/help: Show help
-        - ver/version: Show version
-        - v/verbose: Increase the level of verbosity
-        - q/quiet: Suppress logging
-        - l/log: Set the base logging level
-        - f/force: Force new computation
 
     Arguments:
         arg_parser: The argument parser.
             If None, initialize a standard argument parser.
         description: The description to use in the help.
             Defaults to "".
+        arguments: The arguments to add.
+            Defaults to frozenset(
+                ["help", "version", "verbose", "quiet", "log", "force"],).
+
 
     Returns:
         The enriched argument parser.
@@ -41,47 +41,54 @@ def common_args(
             add_help=False,
         )
     # :: Add POSIX standard arguments
-    arg_parser.add_argument("-h", "--help", action="help")
-    arg_parser.add_argument(
-        "--ver",
-        "--version",
-        version=(
-            f"{info.name} - ver. {info.version}"
-            f"\nCopyright (C) {info.year} - {info.author}"
-            f"\nLicense: {info.license}"
-            f"\n{info.description}"
-        ),
-        action="version",
-    )
-    arg_parser.add_argument(
-        "-v",
-        "--verbose",
-        action="count",
-        default=0,
-        help="increase the level of verbosity [%(default)s]",
-    )
-    arg_parser.add_argument(
-        "-q",
-        "--quiet",
-        action="store_true",
-        help="override log/verbose args to suppress logging [%(default)s]",
-    )
+    arguments = set(arguments)
+    if "help" in arguments:
+        arg_parser.add_argument("-h", "--help", action="help")
+    if "version" in arguments:
+        arg_parser.add_argument(
+            "--ver",
+            "--version",
+            version=(
+                f"{info.name} - ver. {info.version}"
+                f"\nCopyright (C) {info.year} - {info.author}"
+                f"\nLicense: {info.license}"
+                f"\n{info.description}"
+            ),
+            action="version",
+        )
+    if "verbose" in arguments:
+        arg_parser.add_argument(
+            "-v",
+            "--verbose",
+            action="count",
+            default=0,
+            help="increase the level of verbosity [%(default)s]",
+        )
+    if "quiet" in arguments:
+        arg_parser.add_argument(
+            "-q",
+            "--quiet",
+            action="store_true",
+            help="override log/verbose args to suppress logging [%(default)s]",
+        )
     # :: Add additional arguments
-    arg_parser.add_argument(
-        "-l",
-        "--log",
-        metavar="LEVEL",
-        default="INFO",
-        choices=("DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"),
-        type=str.upper,
-        help="set the base logging level [%(default)s]",
-    )
-    arg_parser.add_argument(
-        "-f",
-        "--force",
-        action="store_true",
-        help="force new processing [%(default)s]",
-    )
+    if "log" in arguments:
+        arg_parser.add_argument(
+            "-l",
+            "--log",
+            metavar="LEVEL",
+            default="INFO",
+            choices=("DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"),
+            type=str.upper,
+            help="set the base logging level [%(default)s]",
+        )
+    if "force" in arguments:
+        arg_parser.add_argument(
+            "-f",
+            "--force",
+            action="store_true",
+            help="force new processing [%(default)s]",
+        )
     return arg_parser
 
 

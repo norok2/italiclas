@@ -6,6 +6,7 @@ from contextlib import asynccontextmanager
 from fastapi import APIRouter, FastAPI
 from fastapi.middleware import cors
 
+from italiclas import etl, ml
 from italiclas.api.routers import ping, predict
 from italiclas.config import cfg, info
 
@@ -14,10 +15,14 @@ from italiclas.config import cfg, info
 async def lifespan(_: FastAPI) -> AsyncGenerator:
     """Manage the application lifespan."""
     # : Startup
+    etl.fetch_raw_data()
+    etl.preprocess_raw_data()
+    ml.train()
 
     yield
 
     # : Shutdown
+    # nothing to do - to remove artifacts use Makefile rules
 
 
 # : Setup FastAPI Application

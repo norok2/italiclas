@@ -65,10 +65,12 @@ class Settings(BaseSettings):
 
     raw_filename: str = Field(..., json_schema_extra={"env": "RAW_FILENAME"})
     clean_filename: str = Field(
-        ..., json_schema_extra={"env": "CLEAN_FILENAME"},
+        ...,
+        json_schema_extra={"env": "CLEAN_FILENAME"},
     )
-    pipeline_filename: str = Field(
-        ..., json_schema_extra={"env": "PIPELINE_FILENAME"},
+    ml_pipeline_filename: str = Field(
+        ...,
+        json_schema_extra={"env": "ML_PIPELINE_FILENAME"},
     )
 
     @property

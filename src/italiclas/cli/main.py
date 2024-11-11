@@ -4,6 +4,7 @@
 import argparse
 import logging
 
+from italiclas import etl, ml
 from italiclas.logger import logger
 from italiclas.utils import misc, stopwatch
 
@@ -32,7 +33,10 @@ def main() -> None:
 
     misc.cli_logging(args, __doc__.strip())
 
-    result = False
+    etl.fetch_raw_data()
+    etl.preprocess_raw_data()
+    ml.train()
+    result = ml.predict(args.text)
     logger.info("'%s' -> is_italian=%s", args.text, result)
     print(result)  # noqa: T201
 

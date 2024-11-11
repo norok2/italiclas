@@ -57,8 +57,7 @@ coverage.xml
 docs/_build/
 
 # IPython Notebook
-*.ipynb
-.ipynb_checkpoints
+.ipynb_checkpoints/
 
 # pyenv
 .python-version
@@ -72,3 +71,5 @@ venv/
 # ======================================================================
 # : Local
 artifacts/
+playground/
+!playground/*.ipynb

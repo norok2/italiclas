@@ -3,7 +3,7 @@ name = "italiclas"
 version = "0.0.0"
 description = "*Itali*an *Clas*sifier: A simple classifier for the Italian language."
 authors = ["Riccardo Metere <riccardo@metere.it>"]
-license = "GPLv3"
+license = "GNU Public License v3 (GPLv3)"
 readme = "README.md"
 
 [tool.poetry.dependencies]
@@ -37,7 +37,7 @@ build-backend = "poetry.core.masonry.api"
 [tool.ruff]
 line-length = 79
 target-version = 'py312'
-exclude = ["*.ipynb"]
+exclude = ["*.ipynb", "playground/*"]
 
 [tool.ruff.lint]
 select = ["ALL"]

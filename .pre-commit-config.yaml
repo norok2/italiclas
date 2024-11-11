@@ -1,0 +1,44 @@
+repos:
+  # Official hooks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      # Large files
+      - id: check-added-large-files
+        args: ["--maxkb=2048"]
+      # Detect private keys
+      - id: detect-private-key
+      # Check for mixed line ending
+      - id: mixed-line-ending
+        args: ["--fix=lf"]
+
+  # Ruff linter and formatter
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    # Ruff version
+    rev: v0.7.3
+    hooks:
+      # Run the linter
+      - id: ruff
+        types_or: [python, pyi]
+        args: [--fix]
+      # Run the formatter
+      - id: ruff-format
+        types_or: [python, pyi]
+
+  # Local hooks
+  - repo: local
+    hooks:
+      - id: convert-notebooks-to-script
+        name: convert-notebooks-to-script
+        description: Convert Jupyter Notebooks to Scripts
+        stages: [commit]
+        language: system
+        files: ^.*ipynb$
+        entry: jupyter nbconvert --ClearOutputPreprocessor.enabled=True --ClearMetadataPreprocessor.enabled=True --inplace --to notebook
+      - id: update-poetry-lock
+        name: update-poetry-lock
+        description: Update poetry.lock file when pyproject.toml changes
+        language: system
+        pass_filenames: false
+        files: ^pyproject.toml$
+        entry: poetry lock --check --no-update

@@ -15,7 +15,7 @@ italiclas_ml_training = "italiclas.ml.training:main"
 italiclas_ml_prediction = "italiclas.ml.prediction:main"
 
 [tool.poetry.dependencies]
-python = "^3.12"
+python = "^3.11"
 numpy = "^2.0.2"
 numba = "^0.60.0"
 scipy = "^1.14.1"

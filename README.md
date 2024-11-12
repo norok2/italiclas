@@ -2,9 +2,11 @@
 
 A simple classifier for the Italian language.
 
+
 ## Overview
 
 **Italiclas** is a simple machine learning model designed to classify text as being Italian or not.
+
 
 ## Implementation
 

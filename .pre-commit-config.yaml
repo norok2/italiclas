@@ -1,7 +1,7 @@
 repos:
   # Official hooks
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v5.0.0
+    rev: v3.0.1
     hooks:
       # Large files
       - id: check-added-large-files
@@ -31,7 +31,6 @@ repos:
       - id: convert-notebooks-to-script
         name: convert-notebooks-to-script
         description: Convert Jupyter Notebooks to Scripts
-        stages: [pre-commit]
         language: system
         files: ^.*ipynb$
         entry: jupyter nbconvert --ClearOutputPreprocessor.enabled=True --ClearMetadataPreprocessor.enabled=True --inplace --to notebook

@@ -255,6 +255,7 @@ update_env_var_JWT_KEY: confirm_action
 .PHONY: clean_checks_cache
 clean_checks_cache:
 	-rm -rf .ruff_cache
+	-rm -rf .mypy_cache
 
 .PHONY: clean_tests_cache
 clean_tests_cache:

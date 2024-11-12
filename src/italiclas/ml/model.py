@@ -19,8 +19,6 @@ from italiclas.utils import core
 # ======================================================================
 def base_pipeline() -> Pipeline:
     """Get the ML model pipeline."""
-    # TODO @norok2: # noqa: FIX002, TD003
-    #   - read optimized parameters from configuration
     return Pipeline([("vect", CountVectorizer()), ("clf", MultinomialNB())])
 
 

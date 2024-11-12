@@ -17,45 +17,60 @@ def save_obj(
     obj: Any,  # noqa: ANN401
     filepath: Path,
     serializer: Callable = pickle.dumps,
-    compressor: Callable = lzma.compress,
+    compressor: Callable | None = lzma.compress,
+    *,
+    binary: bool = True,
 ) -> None:
-    """Save object to file path.
+    """Save object to filepath.
 
     Args:
         obj: The object to save.
-        filepath: The target file path.
+        filepath: The target filepath.
         serializer: Serialization function.
             Defaults to pickle.dumps.
         compressor: Compression function.
             Defaults to lzma.compress.
+        binary: Open file as binary.
+            Defaults to True.
 
     """
     filepath.parent.mkdir(parents=True, exist_ok=True)
-    with filepath.open("wb") as f:
-        f.write(compressor(serializer(obj)))
+    with filepath.open(f"w{'b' if binary else ''}") as f:
+        if callable(compressor):
+            f.write(compressor(serializer(obj)))
+        else:
+            f.write(serializer(obj))
 
 
 # =====================================================================
 def load_obj(
     filepath: Path,
     deserializer: Callable = pickle.loads,
-    decompressor: Callable = lzma.decompress,
+    decompressor: Callable | None = lzma.decompress,
+    *,
+    binary: bool = True,
 ) -> Any:  # noqa: ANN401
-    """Load object from file path.
+    """Load object from filepath.
 
     Args:
-        filepath: The source file path.
+        filepath: The source filepath.
         deserializer: Deserialization function.
             Defaults to pickle.loads.
         decompressor: Decompression function.
             Defaults to lzma.decompress.
+        binary: Open file as binary.
+            Defaults to True.
 
     Returns:
         The loaded object.
 
     """
-    with filepath.open("rb") as f:
-        return deserializer(decompressor(f.read()))
+    with filepath.open(f"r{'b' if binary else ''}") as f:
+        if callable(decompressor):
+            obj = deserializer(decompressor(f.read()))
+        else:
+            obj = deserializer(f.read())
+        return obj
 
 
 # =====================================================================

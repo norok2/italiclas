@@ -61,7 +61,7 @@ def more_args(arg_parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
         "--ml_pipeline_filepath",
         metavar="FILE",
         type=str,
-        help="input ML model pipeline file path [%(default)s]",
+        help="input ML model pipeline filepath [%(default)s]",
         default=cfg.pipeline_dir / cfg.ml_pipeline_filename,
     )
     return arg_parser

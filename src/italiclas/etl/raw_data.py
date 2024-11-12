@@ -104,7 +104,7 @@ def _more_args(arg_parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
         "--raw_filename",
         metavar="OUT_FILE",
         type=str,
-        help="output file name [%(default)s]",
+        help="output filename [%(default)s]",
         default=cfg.raw_filename,
     )
     arg_parser.add_argument(

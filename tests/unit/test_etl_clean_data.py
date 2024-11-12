@@ -68,6 +68,7 @@ def test_clean_data_processor_raw_data_no_language(raw_df, mocker) -> None:  # n
     invalid_raw_df["Lang"] = invalid_raw_df["Language"]
     invalid_raw_df = invalid_raw_df.drop(["Language"], axis=1)
     mocker.patch("pandas.read_csv", return_value=invalid_raw_df.copy())
+    mocker.patch.object(pd.DataFrame, "to_csv")
     with pytest.raises(ValueError, match="Invalid raw data input"):
         clean_data.processor(force=True)
 
@@ -79,6 +80,7 @@ def test_clean_data_processor_raw_data_no_text(raw_df, mocker) -> None:  # noqa:
     invalid_raw_df["String"] = invalid_raw_df["Text"]
     invalid_raw_df = invalid_raw_df.drop(["Text"], axis=1)
     mocker.patch("pandas.read_csv", return_value=invalid_raw_df.copy())
+    mocker.patch.object(pd.DataFrame, "to_csv")
     with pytest.raises(ValueError, match="Invalid raw data input"):
         clean_data.processor(force=True)
 

@@ -27,9 +27,9 @@ def gen_openapi_specs(
     Args:
         ext: The OpenAPI extension (and output format).
             Defaults to "json".
-        filename: The output file name (without extension).
+        filename: The output filename (without extension).
             Defaults to "openapi".
-        dirpath: The output dir path.
+        dirpath: The output path.
             Defaults to info.base_dir.
         force: Force new computation.
             Defaults to False.
@@ -83,7 +83,7 @@ def more_args(arg_parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
         "--filename",
         metavar="NAME",
         type=str,
-        help="the output file name [%(default)s]",
+        help="the output filename [%(default)s]",
         default="openapi",
     )
     arg_parser.add_argument(

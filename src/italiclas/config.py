@@ -72,6 +72,10 @@ class Settings(BaseSettings):
         ...,
         json_schema_extra={"env": "ML_PIPELINE_FILENAME"},
     )
+    ml_params_filename: str = Field(
+        ...,
+        json_schema_extra={"env": "ML_PARAMS_FILENAME"},
+    )
 
     @property
     def api_base_endpoint(self) -> str:
@@ -81,7 +85,7 @@ class Settings(BaseSettings):
 
     @property
     def log_file_name(self) -> str:
-        """Get the Log file name."""
+        """Get the Log filename."""
         return f"{info.name}.log"
 
     model_config = SettingsConfigDict(extra="ignore", env_file=".env.app")

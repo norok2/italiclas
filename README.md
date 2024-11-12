@@ -93,6 +93,7 @@ graph TD
     PREDICTION --> RESPONSE_PREDICT
 ```
 
+
 ## Endpoints
 
 The API exposes mainly these endpoints:
@@ -102,6 +103,7 @@ The API exposes mainly these endpoints:
 * **GET `/docs`**: Display Swagger Web UI documentation.
 
 For detailed specifications, see [`openapi.yaml`](https://github.com/norok2/italiclas/blob/main/openapi.yaml).
+
 
 ## Setup
 
@@ -122,20 +124,17 @@ For detailed specifications, see [`openapi.yaml`](https://github.com/norok2/ital
     ```shell
     cd italiclas
     ```
- 3. Install [Poetry](https://python-poetry.org/) using `pipx`
-    ```shell
-    make poetry_setup
-    ```
- 4. Install dependencies using Poetry:
+ 3. Install local execution environment (Python library using [Poetry](https://python-poetry.org/) and Poetry itself using `pipx`)
     ```shell
     make install
     ```
 
+
 ## Run
 
 ### TL;DR
- - Local run API: `make exec_api`
- - Docker run API: `make run_api`
+ - Local run API: `make exec`
+ - Docker run API: `make run`
  - Local run CLI: `poetry run italiclas "{text_to_predict}"`
  - Swagger UI: http://localhost:5000/docs
 
@@ -144,7 +143,7 @@ For detailed specifications, see [`openapi.yaml`](https://github.com/norok2/ital
 The training action will be run (and cached):
   - at setup time when running the server application
     ```shell
-    make exec_api
+    make exec
     ```
   - before prediction when running the command-line interface (CLI)
     ```shell
@@ -170,9 +169,9 @@ The prediction can be triggered with:
   - as a REST API served with one of the following commands:
     ```shell
     # local run
-    make exec_api
+    make exec
     # build and run Docker image
-    make play_api
+    make run
     # build and run Docker image from compose
     docker-compose up
     ```
@@ -218,10 +217,10 @@ poetry run pytest tests/functional
 
 ### Load Tests
 The load performance tests are implemented in [`locust`](https://locust.io/).
-To launch them, first run the API server (e.g. with `make play_api`).
+To launch them, first run the API server (e.g. with `make run`).
 Then, on a separate server run the locust instance:
 ```shell
-make test_api
+make test_load_api
 ```
 The server can be reached at http://localhost:8089 where a web UI will be displayed.
 

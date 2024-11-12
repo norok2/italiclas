@@ -1,15 +1,20 @@
 #* Config
 include Makefile.common.mk
+include Makefile.py.mk
+include Makefile.docker.mk
+export UNIQUE_MAKEFILES := $(shell echo $(MAKEFILE_LIST) | tr ' ' '\n' | sort -u | tr '\n' ' ')
 
 
 #** Project
-PROJECT_NAME := $(shell ${PYTHON} -c "import tomllib; print(tomllib.load(open('pyproject.toml', 'rb'))['tool']['poetry']['name'])")
-IMAGE_NAME := $(subst _,-,${PROJECT_NAME})
-DOCKERFILE := infra/container/Dockerfile
-export PKG_DIR := src/${PROJECT_NAME}
+export PROJECT_NAME := $(shell ${PYTHON} -c "import tomllib; print(tomllib.load(open('pyproject.toml', 'rb'))['tool']['poetry']['name'])")
+export PROJECT_SLUG := $(subst _,-,${PROJECT_NAME})
+
+export DOCKER_IMAGE := ${PROJECT_SLUG}-image
+export DOCKER_INSTANCE := ${PROJECT_SLUG}-instance
+
+export PKG_DIR := ${PROJECT_NAME}
 export API_HOST ?= 0.0.0.0
 export API_PORT ?= 5000
-export API_TIMEOUT_CONN ?= 6
 export API_TIMEOUT ?= 6
 export API_NUM_WORKERS ?= 4
 export TEST_API_HOST ?= http://localhost
@@ -20,40 +25,57 @@ export TEST_API_PORT ?= 5000
 
 
 # ======================================================================
+#* Run
+.PHONY: run
+run: run_api  ## Run containerized app
+
+
+# ======================================================================
 #* Installation
-poetry.lock: pyproject.toml
-	${POETRY} lock
+.PHONY: install
+install: poetry_setup install_py  ## Install local execution environment
+.PHONY: uninstall
+uninstall: clean_venv  ## Uninstall local execution environment
 
-install: export POETRY_VIRTUALENVS_IN_PROJECT=true
-install: export POETRY_VIRTUALENVS_CREATE=true
-install: poetry.lock  ## Install Poetry environment
-	${POETRY} install
 
-uninstall:
-	rm -rf .venv
+# ======================================================================
+#* More Execution
+.PHONY: exec
+exec: exec_api  ## Execute app locally
+.PHONY: sh
+sh: run_img_sh  # Run a shell inside the container
+
+
+# ======================================================================
+#* Automatic Fix and Check (Linter, Formatting)
+.PHONY: fix
+fix: ${VENV_DIR} fix_py fix_docker  ## Fix style and formatting
+
+.PHONY: check
+check: ${VENV_DIR} check_py check_docker  ## Check style and formatting
 
 
 # ======================================================================
 #* Test & Coverage
 .PHONY: test
-test: install  ## Run unit tests
-	${POETRY} run coverage run -m pytest --doctest-modules src/ tests/
+test: ${VENV_DIR} test_py  ## Run unit tests
 
-#* Coverage
 .PHONY: coverage
-coverage:  ## Display Code Coverage report
-	${POETRY} run coverage report -m
+coverage: ${VENV_DIR} coverage_py  ## Display Code Coverage report
 
-.PHONY: test_api
-test_api:  ## Run load tests
-	${POETRY} run locust --locustfile infra/perf/locustfile.py --host ${TEST_API_HOST}:${TEST_API_PORT}
+
+# ======================================================================
+#* Continuous Integration (CI)
+.PHONY: ci
+ci: check fix test coverage  ## Continuous Integration (CI)
+
 
 # ======================================================================
 #* Local Run
 #** API
 .PHONY: exec_api
 # exec_api: export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES
-exec_api:
+exec_api:  # Run API locally
 	${POETRY} run uvicorn \
 		--workers ${API_NUM_WORKERS} \
 		--host ${API_HOST} \
@@ -63,7 +85,41 @@ exec_api:
 		${PROJECT_NAME}.api.main:app
 
 
+.PHONY: test_load_api
+test_load_api:
+	${POETRY} run locust --locustfile locustfile.py --host ${TEST_API_HOST}:${TEST_API_PORT}
+
+
+# ======================================================================
+#* Docker Run
+.PHONY: run_api
+run_api: ${DOTENV_FILE} build_img  # Run API from Docker image
+	${DOCKER} run \
+		--publish $(API_PORT):$(API_PORT) \
+		--volume ./${DOTENV_FILE}:/app/${DOTENV_FILE}:ro \
+		--volume ./artifacts:/app/artifacts:rw \
+		--env GIT_COMMIT_SHA1=${GIT_COMMIT_SHA1} \
+		$(DOCKER_IMAGE)
+
+
+# ======================================================================
+#* Cleaning
+.PHONY: clean
+clean:  ## Clean temporary files
+clean: clean_common clean_py clean_docker
+
+.PHONY: clean_all
+clean_all:  ## Clean all files (use with caution!)
+clean_all: echo_clean_dotenv echo_clean_venv clean_all_common clean_all_py clean_all_docker
+
 # ======================================================================
 #* Misc
+update_env_vars: \
+		update_env_var_JWT_KEY
+
+update_env_var_JWT_KEY: confirm_action
+	@$(call update_var_from_stdin,${DOTENV_FILE},API_KEY)
+
+
 openapi.yaml: ${PYTHON_FILES}
-	${POETRY} run ${PKG_DIR}/api/gen_openapi.py
+	${POETRY} run src/${PKG_DIR}/api/gen_openapi.py

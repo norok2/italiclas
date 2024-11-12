@@ -1,17 +1,8 @@
+ifndef _COMMON_MAKEFILE
+_COMMON_MAKEFILE = 1  # Define a variable to mark inclusion
+
+
 # Common Definitions
-
-# ======================================================================
-#* Project files and dirs
-PYTHON_FILES := $(wildcard $(shell find . -not -path '*/\.*' -name '*.py'))
-RUFF_CONFIG_FILE := pyproject.toml
-VENV_DIR := .venv/
-
-# ======================================================================
-#* Tools
-PYTHON := python3
-DOCKER := docker
-POETRY := poetry
-POETRY_VERSION := 1.8.4
 
 # ======================================================================
 #* Colors
@@ -37,18 +28,22 @@ UNDERLINE := $(shell tput smul)
 BLINK := $(shell tput blink)
 REVERSE := $(shell tput rev)
 
+
 # ======================================================================
 #* Message types
 INFO_MSG := ${CYAN}Info${NORMAL}
 WARN_MSG := ${YELLOW}Warning${NORMAL}
 ERR_MSG := ${RED}Error${NORMAL}
 
+
 # ======================================================================
 #* Misc
-# to be synced with `Dockerfile` and `.gitignore`
+# to be synced with other sources of truth
 export TEMP_PATH ?= tmp_dir
 export DOTENV_FILE ?= .env
 export GIT_COMMIT_SHA1 ?= $(shell git rev-parse HEAD)
+export UNIQUE_MAKEFILES := $(shell echo $(MAKEFILE_LIST) | tr ' ' '\n' | sort -u | tr '\n' ' ')
+
 
 # ======================================================================
 #* Display Help
@@ -56,7 +51,8 @@ export GIT_COMMIT_SHA1 ?= $(shell git rev-parse HEAD)
 .PHONY: help
 help:  ## Display this help
 	@echo "Please use \`${MAGENTA}make ${CYAN}<target>${NORMAL}\` where ${CYAN}<target>${NORMAL} is one of:"
-	@grep -E '^[a-zA-Z0-9_\.\-\%]+\: .*?## .*$$' ${MAKEFILE_LIST} | sed 's/^[^:]*://' | awk 'BEGIN {FS = ":.*?##"} {printf "${CYAN}%-24s${NORMAL} %s\n", $$1, $$2}'
+	@grep -E '^[a-zA-Z0-9_\.\-\%]+\: .*?## .*$$' ${UNIQUE_MAKEFILES} | sed 's/^[^:]*://' | awk 'BEGIN {FS = ":.*?##"} {printf "${CYAN}%-24s${NORMAL} %s\n", $$1, $$2}'
+
 
 # ======================================================================
 #* Debug
@@ -141,103 +137,35 @@ endef
 
 
 # ======================================================================
-#* Poetry
-.PHONY: poetry_setup
-poetry_setup: ## Setup Poetry (locally using `pipx`)
-	pipx install poetry
-
-.PHONY: poetry_cleanup
-poetry_cleanup: confirm_action  ## Clean-up Poetry (locally using `pipx`)
-	pipx uninstall ${POETRY}
-
-
-# ======================================================================
-#* Automatic Fix and Check (Linter, Formatting)
-show_ruff_version:
-	${POETRY} run ruff --version
-
-show_mypy_version:
-	${POETRY} run mypy --version
-
-#** Automatic fixing
-fix_py_lint: show_ruff_version ${PYTHON_FILES}
-	${POETRY} run ruff check --config ${RUFF_CONFIG_FILE} --fix .
-
-fix_py_format: show_ruff_version ${PYTHON_FILES}
-	${POETRY} run ruff format --config ${RUFF_CONFIG_FILE}  .
-
-# when fixing: first lint, then format
-fix_py: fix_py_lint fix_py_format
-fix_all: fix_py_lint fix_py_format
-fix: fix_py  ## Automatically Fix Formatting and Lint
-
-#** Checking only
-check_py_format: show_ruff_version ${PYTHON_FILES}
-	${POETRY} run ruff format --config ${RUFF_CONFIG_FILE} --check .
-
-check_py_lint: show_ruff_version ${PYTHON_FILES}
-	${POETRY} run ruff check --config ${RUFF_CONFIG_FILE} .
-
-check_py_types: show_mypy_version ${PYTHON_FILES}
-	${POETRY} run mypy --disable-error-code=import-untyped .
-
-# when checking: first format, then lint
-check_py: check_py_format check_py_lint check_py_types
-check_all: check_py_format check_py_lint check_py_types
-check: check_py  ## Check Formatting and Lint
-
-
-# ======================================================================
-#* Containers Management (with Docker)
-build_img: ${DOCKERFILE}
-	${DOCKER} build \
-		--file ${DOCKERFILE} \
-		--tag ${IMAGE_NAME} \
-		.
-
-stop_img: export IMAGES=$(shell docker ps -aq --filter ancestor=${IMAGE_NAME})
-stop_img:
-	@echo "${INFO_MSG}: Stopping \`${YELLOW}${IMAGE_NAME}${NORMAL}\` Docker image(s)"
-	@if [ -n "${IMAGES}" ]; then \
-		echo "${INFO_MSG}: Stopping Docker image(s): \`${MAGENTA}${IMAGES}${NORMAL}\`"; \
-		${DOCKER} stop ${IMAGES}; \
-	fi
-
-clean_img:
-	${DOCKER} system prune --all --volumes --force --filter "label=${IMAGE_NAME}"
-
-.PHONY: run_api
-run_api: ${DOTENV_FILE}
-	$(call check_file_exists,${DOTENV_FILE},0)
-	${DOCKER} run \
-		--publish $(API_PORT):$(API_PORT) \
-		--volume ./${DOTENV_FILE}:/app/${DOTENV_FILE}:ro \
-		--volume ./artifacts:/app/artifacts:rw \
-		--env GIT_COMMIT_SHA1=${GIT_COMMIT_SHA1} \
-		$(IMAGE_NAME)
-
-play_api: build_img run_api  ## Build & Run API
-
-
-# ======================================================================
 #* DotEnv Management
 define update_var  # (VAR_FILE,VAR_NAME,VAR_VALUE) -> NULL
-	@echo "${INFO_MSG}: Update \`${MAGENTA}$(1)${NORMAL}\` with \`${YELLOW}$(2)${NORMAL}=\"${GREEN}$(3)${NORMAL}\"\`"
-	@([ -f $(1) ] && grep -q '^$(2)=' $(1) && (sed 's/^$(2)=.*/$(2)="$(3)"/' $(1) > $(1).tmp && mv $(1).tmp $(1))) || echo '$(2)="$(3)"' >> $(1)
+	@echo "${INFO_MSG}: Update \`${MAGENTA}$(1)${NORMAL}\` with \`${YELLOW}$(2)${NORMAL}=\"${GREEN}$(3)${NORMAL}\"\` (was \`${YELLOW}$(2)${NORMAL}=\"${GREEN}`grep '^$(2)=' $(1) | sed 's/^$(2)=//' | tr -d '"'`${NORMAL}\"\`)"
+    @read -r -p "Proceed? (${GREEN}y${NORMAL}/${RED}N${NORMAL}) " CONFIRM; \
+    if [ "$$CONFIRM" = "y" ]; then \
+        ([ -f $(1) ] && grep -q '^$(2)=' $(1) && (sed 's/^$(2)=.*/$(2)="$(3)"/' $(1) > $(1).tmp && mv $(1).tmp $(1))) || echo '$(2)="$(3)"' >> $(1); echo "Updated ${GREEN}confirmed${NORMAL}."; \
+    else \
+        echo "Update ${YELLOW}cancelled${NORMAL}."; \
+    fi
 endef
 
 define update_var_from_stdin  # (VAR_FILE,VAR_NAME) -> NULL
-	$(call update_var,$(1),$(2),$(shell read -p "$(2) = " VAR && echo $$VAR))
+    $(call update_var,$(1),$(2),$(shell read -r -p "New value for $(2) = " VAR && echo $$VAR))
 endef
+
+.PHONY: init_dotenv
+init_dotenv: .env.dev
+	-cp --interactive .env.dev .env
 
 .PHONY: dotenv
 echo_dotenv:
 	@echo "${INFO_MSG}: Populate the \`${MAGENTA}${DOTENV_FILE}${NORMAL}\`" file content
-dotenv:  ## Populate the DOTENV_FILE content
+dotenv:  # Populate the DOTENV_FILE content
 dotenv: \
 		echo_dotenv \
 		confirm_action \
+		init_dotenv \
 		update_env_vars
+	@echo "${INFO_MSG}: Please use \`${CYAN}${BOLD}cat ${DOTENV_FILE}${NORMAL}\` to inspect the content of the file."
 
 ${DOTENV_FILE}:
 	$(MAKE) dotenv
@@ -245,59 +173,32 @@ ${DOTENV_FILE}:
 echo_update_env_var_%:
 	@echo "${INFO_MSG}: Update \`${YELLOW}$*${NORMAL}\` on \`${MAGENTA}${DOTENV_FILE}${NORMAL}\`"
 
-update_env_vars: \
-		update_env_var_JWT_KEY
-	
-update_env_var_JWT_KEY: confirm_action
-	@$(call update_var_from_stdin,${DOTENV_FILE},JWT_KEY)
-
-
 
 # ======================================================================
 #* Cleaning
-.PHONY: clean_checks_cache
-clean_checks_cache:
-	-rm -rf .ruff_cache
-	-rm -rf .mypy_cache
-
-.PHONY: clean_tests_cache
-clean_tests_cache:
-	-rm -rf .pytest_cache
-	-rm -rf .coverage
-
-.PHONY: clean_pycache
-clean_pycache:
-	-find . -name "__pycache__" -type d -exec rm -rf {} +
-
-echo_clean_cache:
-	@echo "${INFO_MSG}: Cleaning cached data"
-clean_cache:  ## Clean cached data
-clean_cache: echo_clean_cache confirm_action clean_checks_cache clean_tests_cache clean_pycache
-
 .PHONY: clean_logs
-echo_clean_logs:  ## Clean log files
+echo_clean_logs:
 	@echo "${INFO_MSG}: Cleaning log files"
-clean_tmp: echo_clean_logs
+clean_logs: echo_clean_logs
 	-rm *.log
-
-.PHONY: clean_venv
-echo_clean_venv:
-	@echo "${INFO_MSG}: Cleaning Virtual Environment from \`${MAGENTA}${VENV_DIR}${NORMAL}\`"
-clean_venv: echo_clean_venv confirm_action  ## Clean Virtual Environment
-	-rm -rf ${VENV_DIR}
 
 .PHONY: clean_dotenv
 echo_clean_dotenv:
-	@echo "${INFO_MSG}: Cleaning \`${MAGENTA}${DOTENV_FILE}${NORMAL}\`"
-clean_dotenv: echo_clean_dotenv confirm_action  ## Clean DOTENV file
+	@echo "${WARN_MSG}: Cleaning \`${MAGENTA}${DOTENV_FILE}${NORMAL}\`"
+clean_dotenv: echo_clean_dotenv confirm_action  # Clean DOTENV file
 	-rm -rf ${DOTENV_FILE}
 
-.PHONY: clean_docker
-clean_docker: confirm_action
-	-${DOCKER} system prune --all --volumes --force
+.PHONY: clean_common
+echo_clean_common:
+	@echo "${INFO_MSG}: Cleaning common files"
+clean_common: echo_clean_common confirm_action clean_logs
 
-.PHONY: clean_all
-echo_clean_all:
-	@echo "${INFO_MSG}: Cleaning all byproduct files"
-clean_all:  ## Clean all byproduct files
-clean_all: echo_clean_all confirm_action clean_cache clean_tmp clean_venv clean_dotenv clean_img
+.PHONY: clean_all_common
+echo_clean_all_common:
+	@echo "${INFO_MSG}: Cleaning all common files"
+clean_all_common: echo_clean_all_common confirm_action clean_logs clean_dotenv
+
+
+# ======================================================================
+# ifndef _COMMON_MAKEFILE
+endif

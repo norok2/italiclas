@@ -9,7 +9,7 @@ A simple classifier for the Italian language.
 ## Implementation
 
 ### The ML Model
-The model is implemented using a [scikit-learn](https://scikit-learn.org/stable/).
+The model is implemented using [scikit-learn](https://scikit-learn.org/stable/).
 It is not meant to be particularly performant.
 Currently, it uses `CountVectorizer()` to convert the text to a matrix of token counts to prepare the data, followed by `MultinomialNB()` which is a multinomial Naive Bayes classifier particularly well suited for classification with discrete features (such as token counts).
 
@@ -178,7 +178,7 @@ The prediction can be triggered with:
     ```shell
     poetry run italiclas "{text_to_predict}"
     ```
-  - when running the predict script (requires the pre-trained model artifacto to exist already):
+  - when running the predict script (requires the pre-trained model artifacts to exist already):
     ```shell
     poetry run italiclas_ml_prediction
     ```
@@ -229,7 +229,7 @@ No specific monitoring solution is in place yet beyond extensive logging.
 A number of features are in place for a simplified development:
   - pre-commit hooks for automatic quality assurance
       code quality
-  - Makefile rules for automatic quality assurance:
+  - Makefile rules for additional quality assurance tasks:
     ```shell
     make fix  # Fix anything that can be fixed automatically e.g. formatting
     make check  # Check formatting, linting and type consistency

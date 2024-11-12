@@ -41,7 +41,6 @@ def gen_openapi_specs(
         >>> gen_openapi_specs()  # doctest: +SKIP
         PosixPath('openapi.yaml')
 
-
     """
     filepath = dirpath / f"{filename}.{ext}"
 

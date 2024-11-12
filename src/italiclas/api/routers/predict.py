@@ -25,7 +25,8 @@ async def predict(payload: PredictPayload) -> PredictResponse:
     except FileNotFoundError as e:
         # if a race condition where the model could not be load is met
         # retrain the model
-        asyncio.create_task(asyncio.to_thread(ml.train))  # noqa: RUF006
+        async with asyncio.TaskGroup() as tg:
+            tg.create_task(asyncio.to_thread(ml.train))
         raise HTTPException(
             status_code=503,
             detail="Internal Data Temporarily Unavailable",

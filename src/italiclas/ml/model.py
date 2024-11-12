@@ -49,7 +49,7 @@ class TrainingData:
 
 # ======================================================================
 @functools.lru_cache(None)
-def training_data(filepath: Path) -> Pipeline:
+def training_data(filepath: Path) -> TrainingData:
     """Load training data.
 
     Args:

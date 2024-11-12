@@ -11,6 +11,7 @@ VENV_DIR := .venv/
 PYTHON := python3
 DOCKER := docker
 POETRY := poetry
+POETRY_VERSION := 1.8.4
 
 # ======================================================================
 #* Colors
@@ -152,6 +153,9 @@ poetry_cleanup: confirm_action  ## Clean-up Poetry (locally using `pipx`)
 show_ruff_version:
 	${POETRY} run ruff --version
 
+show_mypy_version:
+	${POETRY} run mypy --version
+
 #** Automatic fixing
 fix_py_lint: show_ruff_version ${PYTHON_FILES}
 	${POETRY} run ruff check --config ${RUFF_CONFIG_FILE} --fix .
@@ -171,10 +175,78 @@ check_py_format: show_ruff_version ${PYTHON_FILES}
 check_py_lint: show_ruff_version ${PYTHON_FILES}
 	${POETRY} run ruff check --config ${RUFF_CONFIG_FILE} .
 
+check_py_types: show_mypy_version ${PYTHON_FILES}
+	${POETRY} run mypy --disable-error-code=import-untyped .
+
 # when checking: first format, then lint
-check_py: check_py_format check_py_lint
-check_all: check_py_format check_py_lint 
+check_py: check_py_format check_py_lint check_py_types
+check_all: check_py_format check_py_lint check_py_types
 check: check_py  ## Check Formatting and Lint
+
+
+# ======================================================================
+#* Containers Management (with Docker)
+build_img: ${DOCKERFILE}
+	${DOCKER} build \
+		--file ${DOCKERFILE} \
+		--tag ${IMAGE_NAME} \
+		.
+
+stop_img: export IMAGES=$(shell docker ps -aq --filter ancestor=${IMAGE_NAME})
+stop_img:
+	@echo "${INFO_MSG}: Stopping \`${YELLOW}${IMAGE_NAME}${NORMAL}\` Docker image(s)"
+	@if [ -n "${IMAGES}" ]; then \
+		echo "${INFO_MSG}: Stopping Docker image(s): \`${MAGENTA}${IMAGES}${NORMAL}\`"; \
+		${DOCKER} stop ${IMAGES}; \
+	fi
+
+clean_img:
+	${DOCKER} system prune --all --volumes --force --filter "label=${IMAGE_NAME}"
+
+.PHONY: run_api
+run_api: ${DOTENV_FILE}
+	$(call check_file_exists,${DOTENV_FILE},0)
+	${DOCKER} run \
+		--publish $(API_PORT):$(API_PORT) \
+		--volume ./${DOTENV_FILE}:/app/${DOTENV_FILE}:ro \
+		--env GIT_COMMIT_SHA1=${GIT_COMMIT_SHA1} \
+		$(IMAGE_NAME)
+
+play_api: build_img run_api  ## Build & Run API
+
+
+# ======================================================================
+#* DotEnv Management
+define update_var  # (VAR_FILE,VAR_NAME,VAR_VALUE) -> NULL
+	@echo "${INFO_MSG}: Update \`${MAGENTA}$(1)${NORMAL}\` with \`${YELLOW}$(2)${NORMAL}=\"${GREEN}$(3)${NORMAL}\"\`"
+	@([ -f $(1) ] && grep -q '^$(2)=' $(1) && (sed 's/^$(2)=.*/$(2)="$(3)"/' $(1) > $(1).tmp && mv $(1).tmp $(1))) || echo '$(2)="$(3)"' >> $(1)
+endef
+
+define update_var_from_stdin  # (VAR_FILE,VAR_NAME) -> NULL
+	$(call update_var,$(1),$(2),$(shell read -p "$(2) = " VAR && echo $$VAR))
+endef
+
+.PHONY: dotenv
+echo_dotenv:
+	@echo "${INFO_MSG}: Populate the \`${MAGENTA}${DOTENV_FILE}${NORMAL}\`" file content
+dotenv:  ## Populate the DOTENV_FILE content
+dotenv: \
+		echo_dotenv \
+		confirm_action \
+		update_env_vars
+
+${DOTENV_FILE}:
+	$(MAKE) dotenv
+
+echo_update_env_var_%:
+	@echo "${INFO_MSG}: Update \`${YELLOW}$*${NORMAL}\` on \`${MAGENTA}${DOTENV_FILE}${NORMAL}\`"
+
+update_env_vars: \
+		update_env_var_JWT_KEY
+	
+update_env_var_JWT_KEY: confirm_action
+	@$(call update_var_from_stdin,${DOTENV_FILE},JWT_KEY)
+
 
 
 # ======================================================================

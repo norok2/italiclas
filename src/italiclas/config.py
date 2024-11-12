@@ -30,6 +30,8 @@ info = AppInfo()
 
 
 # ======================================================================
+# type: ignore[call-arg]
+# mypy: disable-error-code="call-arg"
 class Settings(BaseSettings):
     """Application settings."""
 

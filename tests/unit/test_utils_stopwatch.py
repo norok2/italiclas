@@ -103,7 +103,7 @@ def test_clockit_positional_argument_error() -> None:
         match="Unsupported positional argument.",
     ):
 
-        @clockit("invalid_argument")
+        @clockit("invalid_argument")  # type: ignore[arg-type]
         def any_function() -> None:
             pass
 

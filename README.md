@@ -1,19 +1,24 @@
-## Italiclas: Italian Language Classifier
+# Italiclas: *ITALI*an *CLAS*sifier
 
-### Overview
+
+
+## Overview
 
 **Italiclas** is a simple machine learning model designed to classify text as being Italian or not.
 
-### Implementation
+## Implementation
 
 The model is implemented using a [scikit-learn](https://scikit-learn.org/stable/).
 It is not meant to be particularly performant.
 The main objective of this project is to apply state-of-the-art software engineering practices.
+The package provides both a command-line interface (CLI) and a REST API.
+The REST API can be served both locally and from a Docker container.
+The first run requires an active internet connection, as the data is not provided directly
 
-### Architecture
+## Architecture
 [Insert a diagram or textual description of your model's architecture, including data preprocessing, feature extraction, model training, and prediction stages.]
 
-### Endpoints
+## Endpoints
 
 The API exposes mainly these endpoints:
 
@@ -23,14 +28,14 @@ The API exposes mainly these endpoints:
 
 For detailed specifications, see [`openapi.yaml`](https://github.com/norok2/italiclas/blob/main/openapi.yaml).
 
-### Setup
+## Setup
 
-#### Prerequisites
+### Prerequisites
 - [GNU Make](https://www.gnu.org/software/make/) (version 4.3)
 - [pipx](https://pipx.pypa.io/) (version 1.7.1)
 
 
-#### Installation
+### Installation
 1. Clone the repository:
    ```shell
    git clone https://github.com/norok2/italiclas.git
@@ -48,47 +53,70 @@ For detailed specifications, see [`openapi.yaml`](https://github.com/norok2/ital
    make install
    ```
 
-### Run
+## Run
 
-#### Training Pipeline
-1. **Data Preparation:** Collect and preprocess the training data, including tokenization, normalization, and feature extraction.
-2. **Model Training:** Train the chosen machine learning model on the prepared dataset.
-3. **Model Evaluation:** Evaluate the model's performance using appropriate metrics (e.g., accuracy, precision, recall, F1-score).
-4. **Model Saving:** Save the trained model for future use.
+### TL;DR
+ - Local run API: `make exec_api`
+ - Docker run API: `make run_api`
+ - Local run CLI: `poetry run italiclas "{text_to_predict}"`
 
-#### Prediction API
+### Training
+
+The training action will be run (and cached):
+ - at setup time when running the server application
+   ```shell
+   make exec_api
+   ```
+ - before prediction when running the command-line interface (CLI)
+   ```shell
+   poetry run italiclas "{text_to_predict}"
+   ```
+ - when running the training script (requires the clean dataset to exist already):
+   ```shell
+   poetry run italiclas_ml_training
+   ```
+
+Note that it is not strictly needed to run the training script independently.
+
+### Prediction
 1. **Start the API:** Run the API server using a framework like FastAPI or Flask.
 2. **Make Predictions:** Send HTTP POST requests to the `/predict` endpoint with the text to be classified.
 
-### Testing
+## Testing
 
-#### Unit Tests
-- Test individual functions and components of the codebase.
-- Cover edge cases and error handling scenarios.
+### Unit Tests
+The unit tests are implemented using the common [`pytest`](https://www.pytest.org/) package.
+There is one test file per module.
+Additionally, a number of tests are included as examples and run using the [`doctest`](https://docs.python.org/3/library/doctest.html) functionality from the Python standard library.
+Some tests are yet to be implemented.
 
-#### Integration Tests
-- Test the integration of different components (e.g., data preprocessing, model training, API endpoints).
+To run only these tests:
+```shell
+poetry run pytest tests/unit
+```
 
-#### Functional Tests
-- Test the API endpoints to ensure they return correct responses for various input scenarios.
+### Integration Tests
+The integration tests revolve around the provided endpoints.
 
-#### Performance Tests
-- Measure the performance of the model and API endpoints under different load conditions.
-- Optimize performance by profiling and identifying bottlenecks.
+To run only these tests:
+```shell
+poetry run pytest tests/integration
+```
 
-#### Security Tests
-- Conduct security audits to identify and address potential vulnerabilities.
-- Implement security best practices, such as input validation, output sanitization, and secure coding practices.
+### Functional Tests
+The only functional test available relies on testing the application CLI script.
+These are yet to be implemented.
 
-### Monitoring
-- Set up monitoring tools to track API performance, error rates, and latency.
-- Implement logging to record important events and errors.
-- Consider using a monitoring tool like Prometheus and Grafana to visualize metrics and alerts.
+To run only these tests:
+```shell
+poetry run pytest tests/functional
+```
 
-### Development
-- **Best Practices:** Adhere to best practices for code readability, maintainability, and testability.
-- **Version Control:** Use Git to manage code versions and collaborate with others.
-- **Continuous Integration/Continuous Delivery (CI/CD):** Set up a CI/CD pipeline to automate testing, building, and deployment.
-- **Documentation:** Write clear and concise documentation for the project.
+### Load Tests
+The performance tests are implemented in [`locust`](https://locust.io/).
 
-By following these guidelines, you can build a robust and efficient Italian language classifier.
+## Monitoring
+No specific monitoring solution is in place yet beyond extensive logging.
+
+## Development
+

@@ -15,11 +15,12 @@ from italiclas.utils import core, misc, stopwatch
 
 # ======================================================================
 @stopwatch.clockit_log(logger, logging.INFO)
-def train(
+def train(  # noqa: PLR0913
     data_filepath: Path = cfg.data_dir / cfg.clean_filename,
     pipeline_filepath: Path = cfg.pipeline_dir / cfg.ml_pipeline_filename,
     params_filepath: Path = cfg.pipeline_dir / cfg.ml_params_filename,
     *,
+    calc_scores: bool = False,
     optimize: bool = False,
     force: bool = False,
 ) -> Pipeline:
@@ -32,13 +33,15 @@ def train(
             Defaults to cfg.data_dir/cfg.ml_pipeline_filename.
         params_filepath: The ML model parameters filepath.
             Defaults to cfg.data_dir/cfg.ml_params_filename.
+        calc_scores: Compute ML model scores on cross valdation data.
+            Defaults to False.
         optimize: Force new optimization.
             Defaults to False.
         force: Force new computation.
             Defaults to False.
 
     Returns:
-        The trained pipeline.
+        The trained (and optimized) pipeline.
 
     Examples:
         >>> train()  # doctest: +SKIP
@@ -67,7 +70,8 @@ def train(
     else:
         logger.info("[ML] Load ML model pipeline from '%s'", pipeline_filepath)
         pipeline = core.load_obj(pipeline_filepath)
-    model.compute_scores(pipeline, data_filepath)
+    if calc_scores:
+        model.compute_scores(pipeline, data_filepath)
     return pipeline
 
 
@@ -97,6 +101,12 @@ def more_args(arg_parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
         type=str,
         help="output ML model parameters filepath [%(default)s]",
         default=cfg.pipeline_dir / cfg.ml_params_filename,
+    )
+    arg_parser.add_argument(
+        "-s",
+        "--calc_scores",
+        action="store_true",
+        help="compute ML model scores on cross validation data [%(default)s]",
     )
     arg_parser.add_argument(
         "-x",

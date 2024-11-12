@@ -18,6 +18,7 @@ file_handler = logging.handlers.RotatingFileHandler(
     maxBytes=cfg.max_log_file_size,
     backupCount=cfg.max_log_file_count,
 )
+file_handler.namer = lambda x: f"{x.replace('.log', '')}.log"
 file_formatter = logging.Formatter(
     "%(asctime)s.%(msecs)03d|%(name)s|%(levelname)s: "
     "%(message)s -- %(filename)s:%(lineno)d",

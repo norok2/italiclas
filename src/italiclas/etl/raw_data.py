@@ -83,14 +83,13 @@ def fetcher(  # noqa: PLR0913
                         temp_file.write(chunk)
                 temp_file.flush()
                 temp_file.seek(0)
-
                 with zipfile.ZipFile(temp_file, "r") as zip_ref:
                     zip_ref.extract(source_filename, dirpath)
             logger.info("[ETL] Save raw data to '%s'", raw_filepath)
             shutil.move(dirpath / source_filename, raw_filepath)
         else:
             logger.error("[ETL] Could not get raw data")
-            raw_filepath = None
+            return None
     else:
         logger.info("[ETL] Raw data already present in '%s'", raw_filepath)
     return raw_filepath

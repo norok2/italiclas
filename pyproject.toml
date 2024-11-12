@@ -6,6 +6,14 @@ authors = ["Riccardo Metere <riccardo@metere.it>"]
 license = "GNU Public License v3 (GPLv3)"
 readme = "README.md"
 
+[tool.poetry.scripts]
+italiclas = "italiclas.cli.main:main"
+italiclas_etl_raw_data = "italiclas.etl.raw_data:main"
+italiclas_etl_clean_data = "italiclas.etl.raw_data:main"
+italiclas_ml_optim = "italiclas.ml.optim:main"
+italiclas_ml_training = "italiclas.ml.training:main"
+italiclas_ml_prediction = "italiclas.ml.prediction:main"
+
 [tool.poetry.dependencies]
 python = "^3.12"
 numpy = "^2.0.2"
@@ -17,10 +25,12 @@ matplotlib = "^3.9.2"
 pydantic = "^2.9.2"
 pydantic-settings = "^2.6.1"
 rich = "^13.9.4"
+requests = "^2.32.3"
+pyyaml = "^6.0.2"
+
+[tool.poetry.group.api.dependencies]
 fastapi = "^0.115.4"
 uvicorn = "^0.32.0"
-requests = "^2.32.3"
-
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.3"
@@ -32,8 +42,7 @@ mypy-extensions = "^1.0.0"
 pyright = "^1.1.388"
 jupyter = "^1.1.1"
 httpx = "^0.27.2"
-pyyaml = "^6.0.2"
-
+locust = "^2.32.2"
 
 [build-system]
 requires = ["poetry-core"]

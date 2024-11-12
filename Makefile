@@ -36,7 +36,7 @@ uninstall:
 # ======================================================================
 #* Test & Coverage
 .PHONY: test
-test:  ## Run unit tests
+test: install  ## Run unit tests
 	${POETRY} run coverage run -m pytest --doctest-modules src/ tests/
 
 #* Coverage

@@ -105,11 +105,10 @@ For detailed specifications, see [`openapi.yaml`](https://github.com/norok2/ital
 ### Prerequisites
 - [GNU Make](https://www.gnu.org/software/make/) (version 4.3)
 - [pipx](https://pipx.pypa.io/) (version 1.7.1)
-(optional -- for containerization)
 - [Docker](https://www.docker.com/) (version 26.1.5+dfsg1, build a72d7cd)
-(optional -- for container orchestration)
+  (optional -- for containerization)
 - [Docker Compose](https://docs.docker.com/compose/) (version 1.29.2, build unknown)
-
+  (optional -- for container orchestration)
 
 ### Installation
  1. Clone the repository:

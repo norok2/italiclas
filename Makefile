@@ -4,6 +4,7 @@ include Makefile.common.mk
 
 #** Project
 PROJECT_NAME := $(shell ${PYTHON} -c "import tomllib; print(tomllib.load(open('pyproject.toml', 'rb'))['tool']['poetry']['name'])")
+export PKG_DIR := src/${PROJECT_NAME}
 export API_PORT ?= 5000
 export API_TIMEOUT_CONN ?= 6
 export API_TIMEOUT ?= 6
@@ -51,3 +52,9 @@ exec_api:
 		--timeout-keep-alive ${API_TIMEOUT} \
 		--reload \
 		${PROJECT_NAME}.api.main:app
+
+
+# ======================================================================
+#* Misc
+openapi.yaml: ${PYTHON_FILES}
+	${POETRY} run ${PKG_DIR}/api/gen_openapi.py

@@ -47,7 +47,7 @@ def train(  # noqa: PLR0913
     """Perform ML training.
 
     Args:
-        data_filepath: The preprocessed data filepath.
+        data_filepath: The clean data filepath.
             Defaults to cfg.data_dir/cfg.clean_filename.
         model_filepath: The ML model pipeline filepath.
             Defaults to None.
@@ -151,7 +151,7 @@ def more_args(arg_parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
         "--data_filepath",
         metavar="FILE",
         type=str,
-        help="input preprocessed data file path [%(default)s]",
+        help="input clean data file path [%(default)s]",
         default=cfg.data_dir / cfg.clean_filename,
     )
     arg_parser.add_argument(

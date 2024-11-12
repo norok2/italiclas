@@ -24,6 +24,7 @@ def base_pipeline() -> Pipeline:
     )
 
 
+# ======================================================================
 @functools.lru_cache(None)
 def pre_trained_pipeline(filepath: Path) -> Pipeline:
     """Load pre-trained ML model pipeline.

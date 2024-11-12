@@ -41,6 +41,7 @@ def clockit(
 
     Can be used either directly (with or without parentheses)
     or with keyword arguments.
+    Note that positional arguments are not supported by the decorator.
 
     Args:
         decorating: The callable to decorate.
@@ -62,10 +63,16 @@ def clockit(
         >>> @clockit(callback=print_elapsed)
         ... def fn():
         ...     return "Done"
-
         >>> fn()  # doctest: +ELLIPSIS
         Func=fn(), Elapsed=0:00:00.000...
         'Done'
+
+        >>> @clockit("foo")
+        ... def fn():
+        ...     return "Done"
+        Traceback (most recent call last):
+            ...
+        RuntimeWarning: Unsupported positional argument.
 
     """
 

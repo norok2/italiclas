@@ -9,6 +9,7 @@ import zipfile
 from http import HTTPStatus
 from pathlib import Path
 
+import pandas as pd
 import requests
 
 from italiclas.config import cfg
@@ -17,8 +18,25 @@ from italiclas.utils import misc, stopwatch
 
 
 # ======================================================================
+def is_valid(df: pd.DataFrame) -> bool:
+    """Check if data frame is valid raw data.
+
+    Args:
+        df: The input data frame.
+
+    Returns:
+        True if the data frame is valid, False otherwise.
+
+    """
+    columns = ("text", "language")
+    return all(col in df.columns for col in columns) and all(
+        pd.api.types.is_string_dtype(df[col]) for col in columns
+    )
+
+
+# ======================================================================
 @stopwatch.clockit_log(logger, logging.INFO)
-def fetch_raw_data(  # noqa: PLR0913
+def fetcher(  # noqa: PLR0913
     raw_filename: str = cfg.raw_filename,
     dirpath: Path = cfg.data_dir,
     *,
@@ -58,7 +76,7 @@ def fetch_raw_data(  # noqa: PLR0913
     if force or not raw_filepath.is_file():
         response = requests.get(source, stream=True, timeout=timeout)
         if response.status_code == HTTPStatus.OK:  # 200
-            logger.info("[ETL] Fetching raw data", raw_filepath)
+            logger.info("[ETL] Fetching raw data")
             with tempfile.NamedTemporaryFile() as temp_file:
                 for chunk in response.iter_content(chunk_size=chunk_size):
                     if chunk:  # filter out keep-alive new chunks
@@ -71,7 +89,7 @@ def fetch_raw_data(  # noqa: PLR0913
             logger.info("[ETL] Save raw data to '%s'", raw_filepath)
             shutil.move(dirpath / source_filename, raw_filepath)
         else:
-            logger.error("[ETL] Could not get raw data", raw_filepath)
+            logger.error("[ETL] Could not get raw data")
             raw_filepath = None
     else:
         logger.info("[ETL] Raw data already present in '%s'", raw_filepath)
@@ -79,7 +97,7 @@ def fetch_raw_data(  # noqa: PLR0913
 
 
 # ======================================================================
-def more_args(arg_parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
+def _more_args(arg_parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
     """Handle more command-line application arguments."""
     arg_parser.add_argument(
         "-o",
@@ -139,7 +157,7 @@ def main() -> None:
     # : init args and add common parameters
     arg_parser = misc.common_args(description=__doc__)
     # : add script parameters
-    arg_parser = more_args(arg_parser)
+    arg_parser = _more_args(arg_parser)
     args = arg_parser.parse_args()
 
     misc.cli_logging(args, __doc__.strip())
@@ -150,7 +168,7 @@ def main() -> None:
         for k, v in vars(args).items()
         if k not in to_skip and v is not None
     }
-    fetch_raw_data(**kws)
+    fetcher(**kws)
 
 
 # ======================================================================

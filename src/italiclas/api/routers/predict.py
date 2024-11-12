@@ -17,7 +17,6 @@ router = APIRouter()
 )
 async def predict(payload: PredictPayload) -> PredictResponse:
     """Predict if the input language is Italian."""
+    logger.info("[API] POST /predict payload: %s", payload)
     prediction = ml.predict(payload.text)
-    response = PredictResponse(is_italian=prediction)
-    logger.info("%s -> %s", payload, response)
-    return response
+    return PredictResponse(is_italian=prediction)

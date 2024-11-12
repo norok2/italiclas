@@ -15,8 +15,8 @@ from italiclas.config import cfg, info
 async def lifespan(_: FastAPI) -> AsyncGenerator:
     """Manage the application lifespan."""
     # : Startup
-    etl.fetch_raw_data()
-    etl.preprocess_raw_data()
+    etl.raw_data.fetcher()
+    etl.clean_data.processor()
     ml.train()
 
     yield

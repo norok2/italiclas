@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""ETL Preprocess Raw Data."""
+"""ETL Clean Data."""
 
 import argparse
 import logging
@@ -8,20 +8,42 @@ from pathlib import Path
 import pandas as pd
 
 from italiclas.config import cfg
+from italiclas.etl import raw_data
 from italiclas.logger import logger
-from italiclas.utils import core, misc, stopwatch
+from italiclas.utils import misc, stopwatch
+
+
+# ======================================================================
+def is_valid(df: pd.DataFrame) -> bool:
+    """Check if data frame is valid clean data.
+
+    Args:
+        df: The input data frame.
+
+    Returns:
+        True if the data frame is valid, False otherwise.
+
+    """
+    columns = (
+        ("text", pd.api.types.is_string_dtype),
+        ("is_italian", pd.api.types.is_bool_dtype),
+    )
+    return all(
+        col in df.columns and type_checker(df[col])
+        for col, type_checker in columns
+    )
 
 
 # ======================================================================
 @stopwatch.clockit_log(logger, logging.INFO)
-def preprocess_raw_data(
+def processor(
     raw_filename: str = cfg.raw_filename,
     clean_filename: str = cfg.clean_filename,
     dirpath: Path = cfg.data_dir,
     *,
     force: bool = False,
 ) -> Path | None:
-    """Preprocess and clean raw data.
+    """Clean data by preprocessing the raw data.
 
     The input raw data is a CSV file with columns: 'Text' and 'Language'.
 
@@ -40,28 +62,36 @@ def preprocess_raw_data(
     Returns:
         The path to the clean data file.
 
+    Raises:
+        ValueError: if the content of the raw data cannot be processed
     Examples:
-        >>> preprocess_raw_data()  # doctest: +SKIP
+        >>> data_cleaner()  # doctest: +SKIP
         PosixPath('artifacts/data/clean_data.csv')
 
     """
     raw_filepath = dirpath / raw_filename
     clean_filepath = dirpath / clean_filename
     if force or not clean_filepath.is_file():
-        logger.info("[ETL] Preprocessing raw data '%s'", raw_filepath)
-        df = pd.read_csv(raw_filepath)  # noqa: PD901
-        df = df.rename(columns=lambda x: core.namify(x.lower()))  # noqa: PD901
-        df["is_italian"] = df["language"] == "Italian"
-        df = df.drop(["language"], axis=1)  # noqa: PD901
-        logger.info(df.columns)
-        df.to_csv(clean_filepath, index=False)
-        logger.info("[ETL] Clean data stored to '%s'", clean_filepath)
+        logger.info("[ETL] Cleaning data '%s'", raw_filepath)
+        data = pd.read_csv(raw_filepath).rename(columns=str.lower)
+        if raw_data.is_valid(data):
+            data["is_italian"] = data["language"] == "Italian"
+            data = data[["text", "is_italian"]]
+            logger.info(data.columns)
+            data.to_csv(clean_filepath, index=False)
+            logger.info("[ETL] Clean data stored to '%s'", clean_filepath)
+        else:
+            msg = (
+                "Invalid raw data input: expecting columns "
+                "['text', 'language'] (case ignored) of string data type."
+            )
+            raise ValueError(msg)
     else:
         logger.info("[ETL] Load clean data from '%s'", clean_filepath)
-        df = pd.read_csv(clean_filepath)  # noqa: PD901
+        data = pd.read_csv(clean_filepath)
     # : inspect clean dataset
-    num_total = df["is_italian"].count()
-    num_italian = df["is_italian"].sum()
+    num_total = data["is_italian"].count()
+    num_italian = data["is_italian"].sum()
     logger.info(
         "Total: %d; Italian: %d (%.2f%%)",
         num_total,
@@ -119,7 +149,7 @@ def main() -> None:
         for k, v in vars(args).items()
         if k not in to_skip and v is not None
     }
-    preprocess_raw_data(**kws)
+    processor(**kws)
 
 
 # ======================================================================

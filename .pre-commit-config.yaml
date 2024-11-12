@@ -42,3 +42,15 @@ repos:
         pass_filenames: false
         files: ^pyproject.toml$
         entry: poetry lock --check --no-update
+      - id: run-tests
+        name: run-tests
+        description: Run automated tests.
+        language: system
+        pass_filenames: false
+        entry: make test
+      - id: update-openapi-specs
+        name: update-openapi-specs
+        description: Update OpenAPI specifications file.
+        language: system
+        pass_filenames: false
+        entry: make openapi.yaml

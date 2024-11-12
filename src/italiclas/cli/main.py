@@ -33,8 +33,8 @@ def main() -> None:
 
     misc.cli_logging(args, __doc__.strip())
 
-    etl.fetch_raw_data()
-    etl.preprocess_raw_data()
+    etl.raw_data.fetcher()
+    etl.clean_data.processor()
     ml.train()
     result = ml.predict(args.text)
     logger.info("'%s' -> is_italian=%s", args.text, result)

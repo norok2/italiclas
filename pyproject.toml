@@ -21,14 +21,19 @@ fastapi = "^0.115.4"
 uvicorn = "^0.32.0"
 requests = "^2.32.3"
 
+
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.3"
+pytest-mock = "^3.14.0"
 coverage = "^7.6.4"
 ruff = "^0.7.2"
 mypy = "^1.13.0"
 mypy-extensions = "^1.0.0"
 pyright = "^1.1.388"
 jupyter = "^1.1.1"
+httpx = "^0.27.2"
+pyyaml = "^6.0.2"
+
 
 [build-system]
 requires = ["poetry-core"]
@@ -41,3 +46,6 @@ exclude = ["*.ipynb", "playground/*"]
 
 [tool.ruff.lint]
 select = ["ALL"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*.py" = ["S101"]

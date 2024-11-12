@@ -1,0 +1,105 @@
+components:
+  schemas:
+    HTTPValidationError:
+      properties:
+        detail:
+          items:
+            $ref: '#/components/schemas/ValidationError'
+          title: Detail
+          type: array
+      title: HTTPValidationError
+      type: object
+    PingResponse:
+      description: Response of GET /ping endpoint.
+      properties:
+        message:
+          title: Message
+          type: string
+      required:
+      - message
+      title: PingResponse
+      type: object
+    PredictPayload:
+      description: Payload for POST /predict endpoint.
+      properties:
+        text:
+          example: "questa \xE8 una frase in italiano!"
+          title: Text
+          type: string
+      required:
+      - text
+      title: PredictPayload
+      type: object
+    PredictResponse:
+      description: Response of POST /predict endpoint.
+      properties:
+        is_italian:
+          title: Is Italian
+          type: boolean
+      required:
+      - is_italian
+      title: PredictResponse
+      type: object
+    ValidationError:
+      properties:
+        loc:
+          items:
+            anyOf:
+            - type: string
+            - type: integer
+          title: Location
+          type: array
+        msg:
+          title: Message
+          type: string
+        type:
+          title: Error Type
+          type: string
+      required:
+      - loc
+      - msg
+      - type
+      title: ValidationError
+      type: object
+info:
+  description: '*Itali*an *Clas*sifier: A simple classifier for the Italian language.'
+  title: italiclas
+  version: 0.0.0
+openapi: 3.1.0
+paths:
+  /ping:
+    get:
+      description: Ping to check if it is up and running, and get its version.
+      operationId: ping_ping_get
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PingResponse'
+          description: Successful Response
+      summary: Ping
+  /predict:
+    post:
+      description: Predict if the input language is Italian.
+      operationId: predict_predict_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PredictPayload'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PredictResponse'
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: Predict

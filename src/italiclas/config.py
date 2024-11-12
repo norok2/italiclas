@@ -54,7 +54,7 @@ class Settings(BaseSettings):
     )
 
     data_dir: Path = Field(..., json_schema_extra={"env": "DATA_DIR"})
-    pipeline_dir: Path = Field(..., json_schema_extra={"env": "PIPELINE_DIR"})
+    ml_dir: Path = Field(..., json_schema_extra={"env": "ML_DIR"})
 
     raw_data_source: str = Field(
         ...,
@@ -70,13 +70,13 @@ class Settings(BaseSettings):
         ...,
         json_schema_extra={"env": "CLEAN_FILENAME"},
     )
-    ml_pipeline_filename: str = Field(
+    ml_model_pipeline_filename: str = Field(
         ...,
-        json_schema_extra={"env": "ML_PIPELINE_FILENAME"},
+        json_schema_extra={"env": "ML_MODEL_PIPELINE_FILENAME"},
     )
-    ml_params_filename: str = Field(
+    optim_params_filename: str = Field(
         ...,
-        json_schema_extra={"env": "ML_PARAMS_FILENAME"},
+        json_schema_extra={"env": "OPTIM_PARAMS_FILENAME"},
     )
 
     @property

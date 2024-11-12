@@ -15,7 +15,7 @@ from italiclas.utils import misc, stopwatch
 @stopwatch.clockit_log(logger, logging.INFO)
 def predict(
     text: str,
-    ml_pipeline_filepath: Path = cfg.pipeline_dir / cfg.ml_pipeline_filename,
+    ml_pipeline_filepath: Path = cfg.ml_dir / cfg.ml_model_pipeline_filename,
 ) -> bool:
     """Perform ML training.
 
@@ -62,7 +62,7 @@ def more_args(arg_parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
         metavar="FILE",
         type=str,
         help="input ML model pipeline filepath [%(default)s]",
-        default=cfg.pipeline_dir / cfg.ml_pipeline_filename,
+        default=cfg.ml_dir / cfg.ml_model_pipeline_filename,
     )
     return arg_parser
 

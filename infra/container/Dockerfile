@@ -28,13 +28,14 @@ RUN pip3 install poetry==${POETRY_VERSION} && poetry --version
 FROM base as builder
 WORKDIR /
 
-#** Install Environment
+#** Install Environment (makes runtime installation faster)
 COPY pyproject.toml poetry.lock /
 RUN poetry install --no-root --only main,api
 
 # ======================================================================
 #* `runtime` stage
 FROM base as runtime
+# ensure pipeline failure if a single pipeline step fails
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 WORKDIR ${BASE_PATH}
 

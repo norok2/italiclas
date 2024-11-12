@@ -209,6 +209,7 @@ run_api: ${DOTENV_FILE}
 	${DOCKER} run \
 		--publish $(API_PORT):$(API_PORT) \
 		--volume ./${DOTENV_FILE}:/app/${DOTENV_FILE}:ro \
+		--volume ./artifacts:/app/artifacts:rw \
 		--env GIT_COMMIT_SHA1=${GIT_COMMIT_SHA1} \
 		$(IMAGE_NAME)
 

@@ -17,8 +17,8 @@ from italiclas.utils import core, misc, stopwatch
 @stopwatch.clockit_log(logger, logging.INFO)
 def train(  # noqa: PLR0913
     data_filepath: Path = cfg.data_dir / cfg.clean_filename,
-    pipeline_filepath: Path = cfg.pipeline_dir / cfg.ml_pipeline_filename,
-    params_filepath: Path = cfg.pipeline_dir / cfg.ml_params_filename,
+    pipeline_filepath: Path = cfg.ml_dir / cfg.ml_model_pipeline_filename,
+    params_filepath: Path = cfg.ml_dir / cfg.optim_params_filename,
     *,
     calc_scores: bool = False,
     optimize: bool = False,
@@ -69,7 +69,9 @@ def train(  # noqa: PLR0913
         core.save_obj(pipeline, pipeline_filepath)
     else:
         logger.info("[ML] Load ML model pipeline from '%s'", pipeline_filepath)
-        pipeline = core.load_obj(pipeline_filepath)
+        # load can be avoided here: pipeline = core.load_obj(pipeline_filepath)
+    # will trigger caching for prediction
+    pipeline = model.pre_trained_pipeline(pipeline_filepath)
     if calc_scores:
         model.compute_scores(pipeline, data_filepath)
     return pipeline
@@ -92,7 +94,7 @@ def more_args(arg_parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
         metavar="FILE",
         type=str,
         help="output ML model pipeline filepath [%(default)s]",
-        default=cfg.pipeline_dir / cfg.ml_pipeline_filename,
+        default=cfg.ml_dir / cfg.ml_model_pipeline_filename,
     )
     arg_parser.add_argument(
         "-p",
@@ -100,7 +102,7 @@ def more_args(arg_parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
         metavar="FILE",
         type=str,
         help="output ML model parameters filepath [%(default)s]",
-        default=cfg.pipeline_dir / cfg.ml_params_filename,
+        default=cfg.ml_dir / cfg.optim_params_filename,
     )
     arg_parser.add_argument(
         "-s",

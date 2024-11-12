@@ -21,7 +21,7 @@ from italiclas.utils import core, misc, stopwatch
 @stopwatch.clockit_log(logger, logging.INFO)
 def hyperparams(
     data_filepath: Path = cfg.data_dir / cfg.clean_filename,
-    params_filepath: Path = cfg.pipeline_dir / cfg.ml_params_filename,
+    params_filepath: Path = cfg.ml_dir / cfg.optim_params_filename,
     *,
     scoring: model.ScoringType | None = "f1",
     cross_validation: int = 5,
@@ -105,7 +105,7 @@ def more_args(arg_parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
         metavar="FILE",
         type=str,
         help="output ML model parameters filepath [%(default)s]",
-        default=cfg.pipeline_dir / cfg.ml_params_filename,
+        default=cfg.ml_dir / cfg.optim_params_filename,
     )
     arg_parser.add_argument(
         "-s",

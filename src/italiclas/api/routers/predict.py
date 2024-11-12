@@ -1,6 +1,8 @@
 """Predict endpoint."""
 
-from fastapi import APIRouter, status
+import asyncio
+
+from fastapi import APIRouter, HTTPException, status
 
 from italiclas import ml
 from italiclas.api.models.payloads import PredictPayload
@@ -18,5 +20,14 @@ router = APIRouter()
 async def predict(payload: PredictPayload) -> PredictResponse:
     """Predict if the input language is Italian."""
     logger.info("[API] POST /predict payload: %s", payload)
-    prediction = ml.predict(payload.text)
+    try:
+        prediction = ml.predict(payload.text)
+    except FileNotFoundError as e:
+        # if a race condition where the model could not be load is met
+        # retrain the model
+        asyncio.create_task(asyncio.to_thread(ml.train))  # noqa: RUF006
+        raise HTTPException(
+            status_code=503,
+            detail="Internal Data Temporarily Unavailable",
+        ) from e
     return PredictResponse(is_italian=prediction)

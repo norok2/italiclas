@@ -173,7 +173,7 @@ The prediction can be triggered with:
     # build and run Docker image from compose
     docker-compose up
     ```
-  in all cases the API will be served at http://localhost:5000
+    in all cases the API will be served at http://localhost:5000
   - running the command-line interface (CLI)
     ```shell
     poetry run italiclas "{text_to_predict}"
@@ -226,8 +226,9 @@ The server can be reached at http://localhost:8089 where a web UI will be displa
 No specific monitoring solution is in place yet beyond extensive logging.
 
 ## Development
-A number of commands are in place for smoother development:
-  - pre-commit hooks for code quality
+A number of features are in place for a simplified development:
+  - pre-commit hooks for automatic quality assurance
+      code quality
   - Makefile rules for automatic quality assurance:
     ```shell
     make fix  # Fix anything that can be fixed automatically e.g. formatting

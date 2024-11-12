@@ -31,7 +31,7 @@ repos:
       - id: convert-notebooks-to-script
         name: convert-notebooks-to-script
         description: Convert Jupyter Notebooks to Scripts
-        stages: [commit]
+        stages: [pre-commit]
         language: system
         files: ^.*ipynb$
         entry: jupyter nbconvert --ClearOutputPreprocessor.enabled=True --ClearMetadataPreprocessor.enabled=True --inplace --to notebook

@@ -56,7 +56,7 @@ export GIT_COMMIT_SHA1 ?= $(shell git rev-parse HEAD)
 .PHONY: help
 help:  ## Display this help
 	@echo "Please use \`${MAGENTA}make ${CYAN}<target>${NORMAL}\` where ${CYAN}<target>${NORMAL} is one of:"
-	@grep -E '^[a-zA-Z_\.\-\%]+\: .*?## .*$$' ${MAKEFILE_LIST} | sed 's/^[^:]*://' | awk 'BEGIN {FS = ":.*?##"} {printf "${CYAN}%-24s${NORMAL} %s\n", $$1, $$2}'
+	@grep -E '^[a-zA-Z0-9_\.\-\%]+\: .*?## .*$$' ${MAKEFILE_LIST} | sed 's/^[^:]*://' | awk 'BEGIN {FS = ":.*?##"} {printf "${CYAN}%-24s${NORMAL} %s\n", $$1, $$2}'
 
 # ======================================================================
 #* Debug
@@ -96,8 +96,9 @@ define check_var_not_empty  # (VAR_NAME,IS_BREAKING) -> NULL
 	VALUE=$($(1)); \
 	IS_BREAKING=$(2); \
 	if [ -z "$${VALUE}" ]; then \
-		echo "${WARN_MSG}: ${YELLOW}$${VAR_NAME}${NORMAL} is empty"; \
-		([ "$${IS_BREAKING}" -eq 0 ] && (true) || (exit -1)); \
+		[ "$${IS_BREAKING}" -eq 0 ] && (echo -n "${WARN_MSG}") || (echo -n "${ERR_MSG}"); \
+		echo ": ${YELLOW}$${VAR_NAME}${NORMAL} is empty"; \
+		([ "$${IS_BREAKING}" -eq 0 ] && (true) || (exit 1)); \
 	else \
 		echo "${INFO_MSG}: Using ${YELLOW}$${VAR_NAME}${NORMAL}=\"${GREEN}$${VALUE}${NORMAL}\""; \
 	fi
@@ -119,8 +120,9 @@ define check_var_one_of # (VAR_NAME,IS_BREAKING,VALUES) -> NULL
 	if [ $${VALID} -eq 1 ]; then \
 		echo "${INFO_MSG}: ${YELLOW}$${VAR_NAME}${NORMAL}=\"${GREEN}$${VALUE}${NORMAL}\" in allowlist"; \
 	else \
-		echo "${WARN_MSG}: ${YELLOW}$${VAR_NAME}${NORMAL}=\"${GREEN}$${VALUE}${NORMAL}\" NOT in allowlist"; \
-		([ "$${IS_BREAKING}" -eq 0 ] && (true) || (exit -1)); \
+		[ "$${IS_BREAKING}" -eq 0 ] && (echo -n "${WARN_MSG}") || (echo -n "${ERR_MSG}"); \
+		echo ": ${YELLOW}$${VAR_NAME}${NORMAL}=\"${GREEN}$${VALUE}${NORMAL}\" NOT in allowlist"; \
+		([ "$${IS_BREAKING}" -eq 0 ] && (true) || (exit 1)); \
 	fi
 endef
 
@@ -131,8 +133,9 @@ define check_file_exists  # (FILE_PATH,IS_BREAKING) -> NULL
 	if [ -f "$${FILE_PATH}" ]; then \
 		echo "${INFO_MSG}: \`${MAGENTA}$${FILE_PATH}${NORMAL}\` found"; \
 	else \
-		echo "${WARN_MSG}: \`${MAGENTA}$${FILE_PATH}${NORMAL}\` NOT found"; \
-		([ "$${IS_BREAKING}" -eq 0 ] && (true) || (exit -1)); \
+		[ "$${IS_BREAKING}" -eq 0 ] && (echo -n "${WARN_MSG}") || (echo -n "${ERR_MSG}"); \
+		echo ": \`${MAGENTA}$${FILE_PATH}${NORMAL}\` NOT found"; \
+		([ "$${IS_BREAKING}" -eq 0 ] && (true) || (exit 1)); \
 	fi
 endef
 

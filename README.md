@@ -53,9 +53,10 @@ To address these limitations the following approaches can be explored:
 ### ML Engineering
 
 The main objective of this project is to apply state-of-the-art software engineering practices.
-The package provides both a command-line interface (CLI) and a REST API.
+The package provides both a command-line interface (CLI) (managed with [`argparse`](https://docs.python.org/3/library/argparse.html) and [`rich`](https://github.com/Textualize/rich)) and a REST API served using [`FastAPI`](https://fastapi.tiangolo.com/).
 The REST API can be served both locally and from a Docker container.
-The first run requires an active internet connection, as the data is not provided directly
+The first run requires an active internet connection, as the data is not provided directly in the repository.
+
 
 ## Architecture
 ```mermaid

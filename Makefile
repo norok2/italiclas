@@ -5,8 +5,11 @@ include Makefile.docker.mk
 export UNIQUE_MAKEFILES := $(shell echo $(MAKEFILE_LIST) | tr ' ' '\n' | sort -u | tr '\n' ' ')
 
 
+#** Tools
+UV := uv
+
 #** Project
-export PROJECT_NAME := $(shell ${PYTHON} -c "import tomllib; print(tomllib.load(open('pyproject.toml', 'rb'))['tool']['poetry']['name'])")
+export PROJECT_NAME := $(shell ${PYTHON} -c "import tomllib; print(tomllib.load(open('pyproject.toml', 'rb'))['project']['name'])")
 export PROJECT_SLUG := $(subst _,-,${PROJECT_NAME})
 
 export DOCKER_IMAGE := ${PROJECT_SLUG}-image
@@ -33,7 +36,7 @@ run: run_api  ## Run containerized app
 # ======================================================================
 #* Installation
 .PHONY: install
-install: poetry_setup install_py  ## Install local execution environment
+install: uv_setup install_py  ## Install local execution environment
 .PHONY: uninstall
 uninstall: clean_venv  ## Uninstall local execution environment
 
@@ -76,7 +79,7 @@ ci: check fix test coverage  ## Continuous Integration (CI)
 .PHONY: exec_api
 # exec_api: export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES
 exec_api:  # Run API locally
-	${POETRY} run uvicorn \
+	${UV} run uvicorn \
 		--workers ${API_NUM_WORKERS} \
 		--host ${API_HOST} \
 		--port ${API_PORT} \
@@ -87,7 +90,7 @@ exec_api:  # Run API locally
 
 .PHONY: test_load_api
 test_load_api:
-	${POETRY} run locust --locustfile locustfile.py --host ${TEST_API_HOST}:${TEST_API_PORT}
+	${UV} run locust --locustfile locustfile.py --host ${TEST_API_HOST}:${TEST_API_PORT}
 
 
 # ======================================================================
@@ -122,4 +125,4 @@ update_env_var_JWT_KEY: confirm_action
 
 
 openapi.yaml: ${PYTHON_FILES}
-	${POETRY} run src/${PKG_DIR}/api/gen_openapi.py
+	${UV} run src/${PKG_DIR}/api/gen_openapi.py

@@ -34,13 +34,13 @@ repos:
         language: system
         files: ^.*ipynb$
         entry: jupyter nbconvert --ClearOutputPreprocessor.enabled=True --ClearMetadataPreprocessor.enabled=True --inplace --to notebook
-      - id: update-poetry-lock
-        name: update-poetry-lock
-        description: Update poetry.lock file when pyproject.toml changes
+      - id: update-uv-lock
+        name: update-uv-lock
+        description: Update uv.lock file when pyproject.toml changes
         language: system
         pass_filenames: false
         files: ^pyproject.toml$
-        entry: poetry lock --check --no-update
+        entry: uv lock --check
       - id: run-tests
         name: run-tests
         description: Run automated tests.

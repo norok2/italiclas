@@ -124,7 +124,7 @@ For detailed specifications, see [`openapi.yaml`](https://github.com/norok2/ital
     ```shell
     cd italiclas
     ```
- 3. Install local execution environment (Python library using [Poetry](https://python-poetry.org/) and Poetry itself using `pipx`)
+ 3. Install local execution environment (Python library using [uv](https://docs.astral.sh/uv/) and uv itself using `pipx`)
     ```shell
     make install
     ```
@@ -135,7 +135,7 @@ For detailed specifications, see [`openapi.yaml`](https://github.com/norok2/ital
 ### TL;DR
  - Local run API: `make exec`
  - Docker run API: `make run`
- - Local run CLI: `poetry run italiclas "{text_to_predict}"`
+ - Local run CLI: `uv run italiclas "{text_to_predict}"`
  - Swagger UI: http://localhost:5000/docs
 
 ### Training
@@ -147,11 +147,11 @@ The training action will be run (and cached):
     ```
   - before prediction when running the command-line interface (CLI)
     ```shell
-    poetry run italiclas "{text_to_predict}"
+    uv run italiclas "{text_to_predict}"
     ```
   - when running the training script (requires the clean dataset to exist already):
     ```shell
-    poetry run italiclas_ml_training
+    uv run italiclas_ml_training
     ```
 
 Note that it is not strictly needed to run the training script independently.
@@ -160,7 +160,7 @@ On top of the training, there is an intermediate hyper-parameters optimization s
 This is triggered automatically during training, but can be run independently with:
 
 ```shell
-poetry run italiclas_ml_optim
+uv run italiclas_ml_optim
 ```
 
 ### Prediction
@@ -178,11 +178,11 @@ The prediction can be triggered with:
     in all cases the API will be served at http://localhost:5000
   - running the command-line interface (CLI)
     ```shell
-    poetry run italiclas "{text_to_predict}"
+    uv run italiclas "{text_to_predict}"
     ```
   - when running the predict script (requires the pre-trained model artifacts to exist already):
     ```shell
-    poetry run italiclas_ml_prediction
+    uv run italiclas_ml_prediction
     ```
 
 ## Testing
@@ -195,7 +195,7 @@ Some tests are yet to be implemented.
 
 To run only these tests:
 ```shell
-poetry run pytest tests/unit
+uv run pytest tests/unit
 ```
 
 ### Integration Tests
@@ -203,7 +203,7 @@ The integration tests revolve around the provided endpoints.
 
 To run only these tests:
 ```shell
-poetry run pytest tests/integration
+uv run pytest tests/integration
 ```
 
 ### Functional Tests
@@ -212,7 +212,7 @@ These are yet to be implemented.
 
 To run only these tests:
 ```shell
-poetry run pytest tests/functional
+uv run pytest tests/functional
 ```
 
 ### Load Tests

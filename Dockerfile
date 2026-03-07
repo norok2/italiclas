@@ -9,18 +9,16 @@ FROM ${BASE_IMAGE}:${BASE_VERSION} as base
 
 ENV \
     PROJECT_NAME=italiclas \
-    POETRY_VERSION=1.8.4 \
+    UV_VERSION=0.10.9 \
     USERNAME=data-science \
     BASE_PATH=/app \
     VENV_DIR=.venv \
-    POETRY_NO_INTERACTION=true \
-    POETRY_VIRTUALENVS_IN_PROJECT=true \
-    POETRY_VIRTUALENVS_CREATE=true \
-    POETRY_CACHE_DIR=/tmp/poetry_cache
-# path used by Poetry to locate the Virtual Environment to use
+    UV_NO_INTERACTION=true \
+    UV_CACHE_DIR=/tmp/uv_cache
+# path used by uv to locate the Virtual Environment to use
 ENV VIRTUAL_ENV=${BASE_PATH}/${VENV_DIR}
 
-RUN pip3 install poetry==${POETRY_VERSION} && poetry --version
+RUN pip3 install uv && uv --version
 
 
 # ======================================================================
@@ -29,8 +27,8 @@ FROM base as builder
 WORKDIR /
 
 #** Install Environment (makes runtime installation faster)
-COPY pyproject.toml poetry.lock /
-RUN poetry install --no-root --only main,api
+COPY pyproject.toml uv.lock /
+RUN uv sync --extra main --extra api
 
 # ======================================================================
 #* `runtime` stage
@@ -58,14 +56,14 @@ COPY --link artifacts/ artifacts/
 COPY --link \
     LICENSE.md README.md .env.app openapi.yaml \
     Makefile Makefile.common.mk \
-    pyproject.toml poetry.lock \
+    pyproject.toml uv.lock \
     ./
 
 #** Initialize Virtual Env from builder
-COPY --from=builder ${POETRY_CACHE_DIR} ${POETRY_CACHE_DIR}
+COPY --from=builder .venv .venv
 
 #** Install environment with package
-RUN poetry install --only main,api
+RUN uv sync --extra main --extra api
 
 #** Update PATH and PYTHONPATH
 ENV PATH=${VIRTUAL_ENV}/bin:${PATH}
@@ -80,4 +78,4 @@ ENV \
 USER ${USERNAME}
 
 ENTRYPOINT ["/bin/sh", "-c"]
-CMD ["exec poetry run uvicorn --workers ${API_NUM_WORKERS} --host ${API_HOST} --port ${API_PORT} --timeout-keep-alive ${API_TIMEOUT} ${PROJECT_NAME}.api.main:app"]
+CMD ["exec uv run uvicorn --workers ${API_NUM_WORKERS} --host ${API_HOST} --port ${API_PORT} --timeout-keep-alive ${API_TIMEOUT} ${PROJECT_NAME}.api.main:app"]

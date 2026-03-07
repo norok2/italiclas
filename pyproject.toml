@@ -1,12 +1,44 @@
-[tool.poetry]
+[project]
 name = "italiclas"
 version = "0.0.0"
 description = "*Itali*an *Clas*sifier: A simple classifier for the Italian language."
-authors = ["Riccardo Metere <riccardo@metere.it>"]
-license = "GNU Public License v3 (GPLv3)"
+authors = [{name = "Riccardo Metere", email = "riccardo@metere.it"}]
+license = {text = "GNU Public License v3 (GPLv3)"}
 readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "numpy>=2.0.2,<3.0.0",
+    "numba>=0.60.0,<1.0.0",
+    "scipy>=1.14.1,<2.0.0",
+    "pandas>=2.2.3,<3.0.0",
+    "scikit-learn>=1.5.2,<2.0.0",
+    "matplotlib>=3.9.2,<4.0.0",
+    "pydantic>=2.9.2,<3.0.0",
+    "pydantic-settings>=2.6.1,<3.0.0",
+    "rich>=13.9.4,<14.0.0",
+    "requests>=2.32.3,<3.0.0",
+    "pyyaml>=6.0.2,<7.0.0",
+]
 
-[tool.poetry.scripts]
+[project.optional-dependencies]
+api = [
+    "fastapi>=0.115.4,<1.0.0",
+    "uvicorn>=0.32.0,<1.0.0",
+]
+dev = [
+    "pytest>=8.3.3,<9.0.0",
+    "pytest-mock>=3.14.0,<4.0.0",
+    "coverage>=7.6.4,<8.0.0",
+    "ruff>=0.7.2,<1.0.0",
+    "mypy>=1.13.0,<2.0.0",
+    "mypy-extensions>=1.0.0,<2.0.0",
+    "pyright>=1.1.388,<2.0.0",
+    "jupyter>=1.1.1,<2.0.0",
+    "httpx>=0.27.2,<1.0.0",
+    "locust>=2.32.2,<3.0.0",
+]
+
+[project.scripts]
 italiclas = "italiclas.cli.main:main"
 italiclas_etl_raw_data = "italiclas.etl.raw_data:main"
 italiclas_etl_clean_data = "italiclas.etl.raw_data:main"
@@ -14,39 +46,9 @@ italiclas_ml_optim = "italiclas.ml.optim:main"
 italiclas_ml_training = "italiclas.ml.training:main"
 italiclas_ml_prediction = "italiclas.ml.prediction:main"
 
-[tool.poetry.dependencies]
-python = "^3.11"
-numpy = "^2.0.2"
-numba = "^0.60.0"
-scipy = "^1.14.1"
-pandas = "^2.2.3"
-scikit-learn = "^1.5.2"
-matplotlib = "^3.9.2"
-pydantic = "^2.9.2"
-pydantic-settings = "^2.6.1"
-rich = "^13.9.4"
-requests = "^2.32.3"
-pyyaml = "^6.0.2"
-
-[tool.poetry.group.api.dependencies]
-fastapi = "^0.115.4"
-uvicorn = "^0.32.0"
-
-[tool.poetry.group.dev.dependencies]
-pytest = "^8.3.3"
-pytest-mock = "^3.14.0"
-coverage = "^7.6.4"
-ruff = "^0.7.2"
-mypy = "^1.13.0"
-mypy-extensions = "^1.0.0"
-pyright = "^1.1.388"
-jupyter = "^1.1.1"
-httpx = "^0.27.2"
-locust = "^2.32.2"
-
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 [tool.ruff]
 line-length = 79

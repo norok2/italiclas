@@ -8,11 +8,10 @@ include Makefile.common.mk
 # ======================================================================
 #* Tools
 PYTHON := python3
-POETRY := poetry
-POETRY_VERSION := 2.0.1
+UV := uv
+UV_VERSION := 0.10.9
 
-export POETRY_VIRTUALENVS_IN_PROJECT := true
-export POETRY_VIRTUALENVS_CREATE := true
+
 
 
 # ======================================================================
@@ -23,57 +22,56 @@ VENV_DIR := .venv/
 
 
 # ======================================================================
-#* Poetry
+#* UV
 #* Install the tool
-.PHONY: poetry_setup
-poetry_setup: # Setup Poetry (locally using `pipx`)
-	pipx install poetry
+.PHONY: uv_setup
+uv_setup: # Setup uv (locally using `pipx`)
+	pipx install uv
 
-.PHONY: poetry_cleanup
-poetry_cleanup: confirm_action  # Clean-up Poetry (locally using `pipx`)
-	pipx uninstall ${POETRY}
+.PHONY: uv_cleanup
+uv_cleanup: confirm_action  # Clean-up uv
+	@echo "${INFO_MSG}: To uninstall uv, use: pipx uninstall uv"
 
 
-#** Local install with Poetry
-poetry.lock: pyproject.toml
-	${POETRY} lock
+#** Local install with UV
+uv.lock: pyproject.toml
+	${UV} lock
 
-${VENV_DIR}: poetry.lock
-	${POETRY} install
+${VENV_DIR}: uv.lock
+	${UV} sync
 
 .PHONY: install_py
-install_py: pyproject.toml  # Install Poetry environment
-	${POETRY} lock
-	${POETRY} install
+install_py: pyproject.toml  # Install UV environment with dev and api dependencies
+	${UV} sync --extra dev --extra api
 
 
 # ======================================================================
 #* Automatic Fix and Check (Linter, Formatting)
 show_ruff_version:
-	${POETRY} run ruff --version
+	${UV} run ruff --version
 
 show_mypy_version:
-	${POETRY} run mypy --version
+	${UV} run mypy --version
 
 #** Automatic fixing
 fix_py_lint: show_ruff_version ${PYTHON_FILES}
-	${POETRY} run ruff check --config ${RUFF_CONFIG_FILE} --fix .
+	${UV} run ruff check --config ${RUFF_CONFIG_FILE} --fix .
 
 fix_py_format: show_ruff_version ${PYTHON_FILES}
-	${POETRY} run ruff format --config ${RUFF_CONFIG_FILE}  .
+	${UV} run ruff format --config ${RUFF_CONFIG_FILE}  .
 
 # when fixing: first lint, then format
 fix_py: fix_py_lint fix_py_format
 
 #** Checking only
 check_py_format: show_ruff_version ${PYTHON_FILES}
-	${POETRY} run ruff format --config ${RUFF_CONFIG_FILE} --check .
+	${UV} run ruff format --config ${RUFF_CONFIG_FILE} --check .
 
 check_py_lint: show_ruff_version ${PYTHON_FILES}
-	${POETRY} run ruff check --config ${RUFF_CONFIG_FILE} .
+	${UV} run ruff check --config ${RUFF_CONFIG_FILE} .
 
 check_py_types: show_mypy_version ${PYTHON_FILES}
-	${POETRY} run mypy --disable-error-code=import-untyped .
+	${UV} run mypy --disable-error-code=import-untyped .
 
 # when checking: first format, then lint
 check_py: check_py_format check_py_lint check_py_types
@@ -84,12 +82,12 @@ check_all: check_py_format check_py_lint check_py_types
 #* Test & Coverage
 .PHONY: test
 test_py:  # Run unit tests
-	${POETRY} run coverage run -m pytest --doctest-modules src/ tests/
+	${UV} run coverage run -m pytest --doctest-modules src/ tests/
 
 #* Coverage
 .PHONY: coverage
 coverage_py:  # Display Code Coverage report
-	${POETRY} run coverage report -m
+	${UV} run coverage report -m
 
 
 # ======================================================================
